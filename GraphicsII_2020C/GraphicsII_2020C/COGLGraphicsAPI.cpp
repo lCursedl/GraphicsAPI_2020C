@@ -4,9 +4,35 @@
 #include "COGLVertexShader.h"
 #include "COGLPixelShader.h"
 #include "COGLBuffer.h"
+#include "COGLShaderProgram.h"
 #include <string>
 #include <fstream>
 #include <sstream>
+
+const char* COGLGraphicsAPI::readShaderFile(std::wstring file)
+{
+	std::string code;
+	std::ifstream shaderFile;
+	const char* shaderCode;
+
+	shaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+
+	try
+	{
+		shaderFile.open(file);
+		std::stringstream shaderStream;
+		shaderStream << shaderFile.rdbuf();
+		shaderFile.close();
+		code = shaderStream.str();
+		shaderCode = code.c_str();
+	}
+	catch (std::ifstream::failure e)
+	{
+		return nullptr;
+	}
+	
+	return shaderCode;
+}
 
 bool COGLGraphicsAPI::init(HWND window)
 {
@@ -47,6 +73,70 @@ bool COGLGraphicsAPI::createTexture(CTexture* tex, CRTV* rtv)
 		Tex->m_Texture,
 		0);
 	return true;
+}
+
+CShaderProgram* COGLGraphicsAPI::createShaderProgram(std::wstring vsfile,
+	std::wstring psfile)
+{
+	const char* source;
+	int result;
+	char log[512];
+	source = readShaderFile(vsfile);
+	COGLVertexShader* VS = new COGLVertexShader();
+	VS->m_VertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(VS->m_VertexShader, 1, &source, NULL);
+	glCompileShader(VS->m_VertexShader);
+
+	glGetShaderiv(VS->m_VertexShader, GL_COMPILE_STATUS, &result);
+	if (!result)
+	{
+		glGetShaderInfoLog(VS->m_VertexShader, 512, NULL, log);
+		OutputDebugStringA(log);
+		VS->clear();
+		delete VS;
+		return nullptr;
+	}
+
+	source = readShaderFile(psfile);
+	COGLPixelShader* PS = new COGLPixelShader();
+	PS->m_PS = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(PS->m_PS, 1, &source, NULL);
+	glCompileShader(PS->m_PS);
+
+	glGetShaderiv(PS->m_PS, GL_COMPILE_STATUS, &result);
+	if (!result)
+	{
+		glGetShaderInfoLog(PS->m_PS, 512, NULL, log);
+		OutputDebugStringA(log);
+		VS->clear();
+		delete VS;
+		PS->clear();
+		delete PS;
+		return nullptr;
+	}
+
+	COGLShaderProgram* ShaderProgram = new COGLShaderProgram();
+	ShaderProgram->setVertexShader(VS);
+	ShaderProgram->setPixelShader(PS);
+
+	ShaderProgram->m_Program = glCreateProgram();
+	glAttachShader(ShaderProgram->m_Program, VS->m_VertexShader);
+	glAttachShader(ShaderProgram->m_Program, PS->m_PS);
+	glLinkProgram(ShaderProgram->m_Program);
+
+	glGetProgramiv(ShaderProgram->m_Program, GL_LINK_STATUS, &result);
+	if (!result)
+	{
+		glGetProgramInfoLog(ShaderProgram->m_Program, 512, NULL, log);
+		OutputDebugStringA(log);
+		ShaderProgram->clear();
+		delete ShaderProgram;
+		delete VS;
+		delete PS;
+		return nullptr;
+	}
+
+	return ShaderProgram;
 }
 
 void COGLGraphicsAPI::setBackBuffer()

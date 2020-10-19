@@ -6,6 +6,8 @@
 #include "CBuffer.h"
 #include "CShaderProgram.h"
 
+#include <string>
+
 class CGraphicsAPI
 {
 public:
@@ -19,6 +21,8 @@ public:
 	virtual bool createRTV(CRTV * rtv, CTexture* tex = nullptr) = 0;
 	
 	//virtual void setRTV(CRTV * rtv) = 0;
+	virtual CShaderProgram* createShaderProgram(std::wstring vsfile,
+		std::wstring psfile) = 0;
 	virtual bool compileAndCreateShader(WCHAR* filename,
 		CShaderProgram* program,
 		LPCSTR entrypoint,

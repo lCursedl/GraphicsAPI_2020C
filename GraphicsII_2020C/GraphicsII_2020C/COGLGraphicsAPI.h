@@ -5,13 +5,20 @@
 class COGLGraphicsAPI :
     public CGraphicsAPI
 {
+private:
+
+    const char* readShaderFile(std::wstring file);
+
 public:
     bool init(HWND window);
+
 
     //DEVICE
 
     bool createRTV(CRTV* rtv, CTexture* tex = nullptr)        override;
     bool createTexture(CTexture* tex, CRTV* rtv = nullptr)    override;
+    CShaderProgram* createShaderProgram(std::wstring vsfile,
+        std::wstring psfile)                                  override;
     bool compileAndCreateVertexShader(WCHAR* filename,
         CVertexShader* shader,
         LPCSTR entryPoint,

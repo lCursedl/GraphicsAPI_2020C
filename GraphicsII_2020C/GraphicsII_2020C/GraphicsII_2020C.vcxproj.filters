@@ -96,6 +96,9 @@
     <ClInclude Include="CDXShaderProgram.h">
       <Filter>Header Files\DirectX</Filter>
     </ClInclude>
+    <ClInclude Include="COGLShaderProgram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
@@ -163,6 +166,9 @@
     </ClCompile>
     <ClCompile Include="CDXShaderProgram.cpp">
       <Filter>Source Files\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="COGLShaderProgram.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

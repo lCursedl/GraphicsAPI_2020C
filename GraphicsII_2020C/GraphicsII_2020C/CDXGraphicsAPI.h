@@ -15,20 +15,8 @@ public:
     bool createRTV(CRTV* rtv, CTexture* tex = nullptr)        override;
     bool createTexture(CTexture* tex, CRTV* rtv = nullptr)    override;
 
-    bool compileAndCreateShader(WCHAR* filename,
-        CShaderProgram* program,
-        LPCSTR entrypoint,
-        LPCSTR shaderModel,
-        SHADER_TYPE type)                                     override;
-
-    bool compileAndCreateVertexShader(WCHAR* filename,
-        CVertexShader* shader,
-        LPCSTR entryPoint,
-        LPCSTR shaderModel)                                   override;
-    bool compileAndCreatePixelShader(WCHAR* filename,
-        CPixelShader* shader,
-        LPCSTR entryPoint,
-        LPCSTR shaderModel)                                   override;
+    CShaderProgram* createShaderProgram(std::wstring vsfile,
+        std::wstring psfile)                                  override;
 
     CBuffer* createBuffer(const void* data,
         unsigned int size,

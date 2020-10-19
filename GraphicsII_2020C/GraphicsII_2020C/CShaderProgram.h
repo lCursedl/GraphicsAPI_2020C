@@ -25,8 +25,17 @@ public:
 		return m_pPixelShader;
 	}
 
-protected:
+	virtual void setVertexShader(CVertexShader* vertexShader)
+	{
+		m_pVertexShader = vertexShader;
+	}
 
+	virtual void setPixelShader(CPixelShader* pixelShader)
+	{
+		m_pPixelShader = pixelShader;
+	}
+
+protected:
 	CVertexShader* m_pVertexShader = nullptr;
 	CPixelShader* m_pPixelShader = nullptr;
 };

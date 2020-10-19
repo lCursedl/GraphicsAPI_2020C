@@ -163,141 +163,67 @@ bool CDXGraphicsAPI::createTexture(CTexture* tex, CRTV* rtv)
 	return false;
 }
 
-bool CDXGraphicsAPI::compileAndCreateShader(WCHAR* filename,
-	CShaderProgram* program,
-	LPCSTR entrypoint,
-	LPCSTR shaderModel,
-	SHADER_TYPE type)
+CShaderProgram* CDXGraphicsAPI::createShaderProgram(std::wstring vsfile,
+	std::wstring psfile)
 {
-	CDXShaderProgram* sp = dynamic_cast<CDXShaderProgram*>(program);
 	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
 	ID3DBlob* ErrorBlob;
 	HRESULT hr;
-	switch (type)
-	{
-	case VERTEX_SHADER:
-		hr = D3DX11CompileFromFile(filename,
-			NULL,
-			NULL,
-			entrypoint,
-			shaderModel,
-			dwShaderFlags,
-			0,
-			NULL,
-			&sp->m_pVertexShader->m_Blob,
-			&ErrorBlob,
-			NULL);
-		break;
-	case PIXEL_SHADER:
-		hr = D3DX11CompileFromFile(filename,
-			NULL,
-			NULL,
-			entrypoint,
-			shaderModel,
-			dwShaderFlags,
-			0,
-			NULL,
-			&sp->m_pPixelShader->m_Blob,
-			&ErrorBlob,
-			NULL);
-		break;
-	}
 
-	if (FAILED(hr))
-	{
-		if (ErrorBlob != NULL)
-		{
-			OutputDebugStringA((char*)ErrorBlob->GetBufferPointer());
-			
-		}
-		if (ErrorBlob)
-		{
-			ErrorBlob->Release();
-		}
-		return false;
-	}
-	if (ErrorBlob)
-	{
-		ErrorBlob->Release();
-	}
-	return true;
-}
-
-bool CDXGraphicsAPI::compileAndCreateVertexShader(WCHAR* filename,
-	CVertexShader* shader,
-	LPCSTR entryPoint,
-	LPCSTR shaderModel)
-{
-	CDXVertexShader* VS = dynamic_cast<CDXVertexShader*>(shader);
-
-	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-
-	ID3DBlob* ErrorBlob;
-	HRESULT hr = D3DX11CompileFromFile(
-		filename,
+	CDXVertexShader* VS = new CDXVertexShader();
+	hr = D3DX11CompileFromFile(vsfile.c_str(),
 		NULL,
 		NULL,
-		entryPoint,
-		shaderModel,
+		"main",
+		"vs_4_0",
 		dwShaderFlags,
 		0,
 		NULL,
 		&VS->m_Blob,
 		&ErrorBlob,
 		NULL);
+	
 	if (FAILED(hr))
 	{
 		if (ErrorBlob != NULL)
 		{
 			OutputDebugStringA((char*)ErrorBlob->GetBufferPointer());
-		}
-		if (ErrorBlob)
-		{
 			ErrorBlob->Release();
 		}
-		return false;
+		VS->clear();
+		delete VS;
+		return nullptr;
 	}
 	if (ErrorBlob)
 	{
 		ErrorBlob->Release();
 	}
 
-	hr = m_Device->CreateVertexShader(VS->m_Blob,
+	hr = m_Device->CreateVertexShader(VS->m_Blob->GetBufferPointer(),
 		VS->m_Blob->GetBufferSize(),
 		NULL,
 		&VS->m_VS);
 
 	if (FAILED(hr))
 	{
-		VS->m_Blob->Release();
-		return false;
+		VS->clear();
+		delete VS;
+		return nullptr;
 	}
 
-	return true;
-}
-
-bool CDXGraphicsAPI::compileAndCreatePixelShader(WCHAR* filename,
-	CPixelShader* shader,
-	LPCSTR entryPoint,
-	LPCSTR shaderModel)
-{
-	CDXPixelShader* PS = dynamic_cast<CDXPixelShader*>(shader);
-
-	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-
-	ID3DBlob* ErrorBlob;
-	HRESULT hr = D3DX11CompileFromFile(
-		filename,
+	CDXPixelShader* PS = new CDXPixelShader();
+	hr = D3DX11CompileFromFile(psfile.c_str(),
 		NULL,
 		NULL,
-		entryPoint,
-		shaderModel,
+		"main",
+		"ps_4_0",
 		dwShaderFlags,
 		0,
 		NULL,
 		&PS->m_Blob,
 		&ErrorBlob,
 		NULL);
+
 	if (FAILED(hr))
 	{
 		if (ErrorBlob != NULL)
@@ -308,25 +234,33 @@ bool CDXGraphicsAPI::compileAndCreatePixelShader(WCHAR* filename,
 		{
 			ErrorBlob->Release();
 		}
-		return false;
-	}
-	if (ErrorBlob)
-	{
-		ErrorBlob->Release();
+		VS->clear();
+		delete VS;
+		PS->clear();
+		delete PS;
+		return nullptr;
 	}
 
-	hr = m_Device->CreatePixelShader(PS->m_Blob,
+	hr = m_Device->CreatePixelShader(PS->m_Blob->GetBufferPointer(),
 		PS->m_Blob->GetBufferSize(),
 		NULL,
 		&PS->m_PS);
 
 	if (FAILED(hr))
 	{
-		PS->m_Blob->Release();
-		return false;
+		VS->clear();
+		delete VS;
+		PS->clear();
+		delete PS;
+		return nullptr;
 	}
 
-	return true;
+	CDXShaderProgram* ShaderProgram = new CDXShaderProgram();
+	ShaderProgram->setVertexShader(VS);
+	ShaderProgram->setPixelShader(PS);
+
+	return ShaderProgram;
+
 }
 
 CBuffer* CDXGraphicsAPI::createBuffer(const void* data,
