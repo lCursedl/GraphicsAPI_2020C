@@ -25,4 +25,6 @@ public:
 
 	ID3D11Texture2D*	m_pTexture;
 	D3D11_TEXTURE2D_DESC m_Desc;
+	ID3D11RenderTargetView* m_pRTV;
+	ID3D11DepthStencilView* m_pDSV;
 };

@@ -10,7 +10,6 @@ public:
     COGLBuffer();
     ~COGLBuffer();
 
-    void init(unsigned int size, BUFFER_TYPE type)  override;
     void clear()                                    override;
 
     GLenum m_Type;

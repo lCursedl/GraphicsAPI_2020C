@@ -1,5 +1,11 @@
 #pragma once
 
+enum SHADER_TYPE
+{
+	VERTEX_SHADER,
+	PIXEL_SHADER
+};
+
 class CVertexShader
 {
 public:

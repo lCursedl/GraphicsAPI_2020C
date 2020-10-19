@@ -20,7 +20,9 @@ public:
         CPixelShader* shader,
         LPCSTR entryPoint,
         LPCSTR shaderModel)                                   override;
-    bool createBuffer(const void* data, CBuffer* buffer)      override;
+    CBuffer* createBuffer(const void* data,
+        unsigned int size,
+        BUFFER_TYPE type)                                     override;
 
     //DEVICE CONTEXT
 

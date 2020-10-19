@@ -9,7 +9,6 @@ public:
     CDXBuffer();
     ~CDXBuffer();
 
-    void init(unsigned int size, BUFFER_TYPE type)  override;
     void clear()                                    override;
 
     ID3D11Buffer* m_Buffer;

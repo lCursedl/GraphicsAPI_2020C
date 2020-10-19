@@ -15,6 +15,12 @@ public:
     bool createRTV(CRTV* rtv, CTexture* tex = nullptr)        override;
     bool createTexture(CTexture* tex, CRTV* rtv = nullptr)    override;
 
+    bool compileAndCreateShader(WCHAR* filename,
+        CShaderProgram* program,
+        LPCSTR entrypoint,
+        LPCSTR shaderModel,
+        SHADER_TYPE type)                                     override;
+
     bool compileAndCreateVertexShader(WCHAR* filename,
         CVertexShader* shader,
         LPCSTR entryPoint,
@@ -24,12 +30,18 @@ public:
         LPCSTR entryPoint,
         LPCSTR shaderModel)                                   override;
 
-    bool createBuffer(const void* data, CBuffer* buffer)      override;
+    CBuffer* createBuffer(const void* data,
+        unsigned int size,
+        BUFFER_TYPE type)                                     override;
 
     //DEVICE CONTEXT
 
     void setBackBuffer()                                      override;
     void setViewport(int width, int height)                   override;
+
+    //MISC
+
+    void compileFile();
 
 private:
     D3D_DRIVER_TYPE         m_DriverType;

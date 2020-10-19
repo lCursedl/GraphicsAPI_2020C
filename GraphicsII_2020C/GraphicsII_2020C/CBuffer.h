@@ -2,7 +2,7 @@
 
 enum BUFFER_TYPE
 {
-	VERTEX_BUFFER,
+	VERTEX_BUFFER = 1,
 	INDEX_BUFFER,
 	CONST_BUFFER
 };
@@ -11,8 +11,11 @@ class CBuffer
 {
 public:
 	CBuffer() {}
-	~CBuffer() {}
 
-	virtual void init(unsigned int size, BUFFER_TYPE type) = 0;
-	virtual void clear() = 0;
+	virtual ~CBuffer()
+	{
+		clear();
+	}
+
+	virtual void clear(){}
 };

@@ -1,9 +1,8 @@
 #include "CDXGraphicsAPI.h"
-#include "CDXVertexShader.h"
-#include "CDXPixelShader.h"
 #include "CDXTexture.h"
 #include "CDXRTV.h"
 #include "CDXBuffer.h"
+#include "CDXShaderProgram.h"
 
 bool CDXGraphicsAPI::init(HWND window)
 {
@@ -122,6 +121,9 @@ bool CDXGraphicsAPI::init(HWND window)
 	//Set main RTV and DSV by default
 	m_DeviceContext->OMSetRenderTargets(1, &m_RTV, m_DSV);
 
+	//Set Viewport
+	setViewport(width, height);
+
 	return true;
 }
 
@@ -147,8 +149,11 @@ bool CDXGraphicsAPI::createTexture(CTexture* tex, CRTV* rtv)
 {
 	if (m_Device != nullptr)
 	{
+		//Cast abstract type to specific
 		CDXTexture* T = dynamic_cast<CDXTexture*>(tex);
+		//Create 2D texture
 		HRESULT hr = m_Device->CreateTexture2D(&T->m_Desc, NULL, &T->m_pTexture);
+		//Check for errors in texture creation
 		if (FAILED(hr))
 		{
 			return false;
@@ -156,6 +161,66 @@ bool CDXGraphicsAPI::createTexture(CTexture* tex, CRTV* rtv)
 		return true;
 	}	
 	return false;
+}
+
+bool CDXGraphicsAPI::compileAndCreateShader(WCHAR* filename,
+	CShaderProgram* program,
+	LPCSTR entrypoint,
+	LPCSTR shaderModel,
+	SHADER_TYPE type)
+{
+	CDXShaderProgram* sp = dynamic_cast<CDXShaderProgram*>(program);
+	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+	ID3DBlob* ErrorBlob;
+	HRESULT hr;
+	switch (type)
+	{
+	case VERTEX_SHADER:
+		hr = D3DX11CompileFromFile(filename,
+			NULL,
+			NULL,
+			entrypoint,
+			shaderModel,
+			dwShaderFlags,
+			0,
+			NULL,
+			&sp->m_pVertexShader->m_Blob,
+			&ErrorBlob,
+			NULL);
+		break;
+	case PIXEL_SHADER:
+		hr = D3DX11CompileFromFile(filename,
+			NULL,
+			NULL,
+			entrypoint,
+			shaderModel,
+			dwShaderFlags,
+			0,
+			NULL,
+			&sp->m_pPixelShader->m_Blob,
+			&ErrorBlob,
+			NULL);
+		break;
+	}
+
+	if (FAILED(hr))
+	{
+		if (ErrorBlob != NULL)
+		{
+			OutputDebugStringA((char*)ErrorBlob->GetBufferPointer());
+			
+		}
+		if (ErrorBlob)
+		{
+			ErrorBlob->Release();
+		}
+		return false;
+	}
+	if (ErrorBlob)
+	{
+		ErrorBlob->Release();
+	}
+	return true;
 }
 
 bool CDXGraphicsAPI::compileAndCreateVertexShader(WCHAR* filename,
@@ -264,9 +329,28 @@ bool CDXGraphicsAPI::compileAndCreatePixelShader(WCHAR* filename,
 	return true;
 }
 
-bool CDXGraphicsAPI::createBuffer(const void* data, CBuffer* buffer)
+CBuffer* CDXGraphicsAPI::createBuffer(const void* data,
+	unsigned int size,
+	BUFFER_TYPE type)
 {
-	CDXBuffer* DXBuffer = dynamic_cast<CDXBuffer*>(buffer);
+	CDXBuffer* DXBuffer = new CDXBuffer();
+
+	DXBuffer->m_Desc.Usage = D3D11_USAGE_DEFAULT;
+	DXBuffer->m_Desc.ByteWidth = size;
+	DXBuffer->m_Desc.CPUAccessFlags = 0;
+
+	switch (type)
+	{
+	case VERTEX_BUFFER:
+		DXBuffer->m_Desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		break;
+	case INDEX_BUFFER:
+		DXBuffer->m_Desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		break;
+	case CONST_BUFFER:
+		DXBuffer->m_Desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		break;
+	}
 
 	D3D11_SUBRESOURCE_DATA InitData;
 	ZeroMemory(&InitData, sizeof(InitData));
@@ -277,9 +361,9 @@ bool CDXGraphicsAPI::createBuffer(const void* data, CBuffer* buffer)
 		&DXBuffer->m_Buffer);
 	if (FAILED(hr))
 	{
-		return false;
+		return nullptr;
 	}
-	return true;
+	return DXBuffer;
 }
 
 void CDXGraphicsAPI::setBackBuffer()

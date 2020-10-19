@@ -14,6 +14,9 @@ bool COGLGraphicsAPI::init(HWND window)
 	{
 		return false;
 	}
+	RECT rc;
+	GetWindowRect(window, &rc);
+	setViewport(rc.right - rc.left, rc.bottom - rc.top);
 	return true;
 }
 
@@ -136,12 +139,28 @@ void COGLGraphicsAPI::setViewport(int width, int height)
 	glViewport(0, 0, width, height);
 }
 
-bool COGLGraphicsAPI::createBuffer(const void* data, CBuffer* buffer)
+CBuffer* COGLGraphicsAPI::createBuffer(const void* data,
+	unsigned int size,
+	BUFFER_TYPE type)
 {
-	COGLBuffer* OGLBuffer = dynamic_cast<COGLBuffer*>(buffer);
+	COGLBuffer* OGLBuffer = new COGLBuffer();
+
+	glGenBuffers(1, &OGLBuffer->m_Buffer);
+	OGLBuffer->m_Size = size;
+
+	switch (type)
+	{
+	case VERTEX_BUFFER:
+		OGLBuffer->m_Type = GL_ARRAY_BUFFER;
+		break;
+	case INDEX_BUFFER:
+		OGLBuffer->m_Type = GL_ELEMENT_ARRAY_BUFFER;
+		break;
+	case CONST_BUFFER:
+		OGLBuffer->m_Type = GL_UNIFORM_BLOCK;
+		break;
+	}
 
 	glBindBuffer(OGLBuffer->m_Type, OGLBuffer->m_Buffer);
 	glBufferData(OGLBuffer->m_Type, OGLBuffer->m_Size, data, GL_STATIC_DRAW);
-
-	return true;
 }
