@@ -12,7 +12,6 @@ public:
 
     //DEVICE
 
-    bool createRTV(CRTV* rtv, CTexture* tex = nullptr)        override;
     CTexture* createTexture(int width, int height)            override;
 
     CShaderProgram* createShaderProgram(std::wstring vsfile,
@@ -27,7 +26,8 @@ public:
     void setBackBuffer()                                      override;
     void setViewport(int width, int height)                   override;
     void setShaders(CShaderProgram* program)                  override;
-
+    void draw(unsigned int indices)                           override;
+    void clearBackBuffer(float red, float green, float blue)  override;
     //MISC
 
     HRESULT compileShaderFromFile(std::wstring fileName,

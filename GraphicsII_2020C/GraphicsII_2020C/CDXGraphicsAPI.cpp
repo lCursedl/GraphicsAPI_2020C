@@ -127,24 +127,6 @@ bool CDXGraphicsAPI::init(HWND window)
 	return true;
 }
 
-bool CDXGraphicsAPI::createRTV(CRTV* rtv, CTexture* tex)
-{
-	if (m_Device != nullptr)
-	{
-		HRESULT hr;
-		hr = m_Device->CreateRenderTargetView(
-			dynamic_cast<CDXTexture*>(tex)->m_pTexture,
-			NULL,
-			&dynamic_cast<CDXRTV*>(rtv)->m_pRTV);
-		if (FAILED(hr))
-		{
-			return false;
-		}
-		return true;
-	}
-	return false;
-}
-
 CTexture* CDXGraphicsAPI::createTexture(int width, int height)
 {
 	if (m_Device != nullptr)
@@ -340,6 +322,18 @@ void CDXGraphicsAPI::setShaders(CShaderProgram* program)
 
 	m_DeviceContext->VSSetShader(VS->m_VS, NULL, 0);
 	m_DeviceContext->PSSetShader(PS->m_PS, NULL, 0);
+}
+
+void CDXGraphicsAPI::draw(unsigned int indices)
+{
+	m_DeviceContext->DrawIndexed(indices, 0, 0);
+}
+
+void CDXGraphicsAPI::clearBackBuffer(float red, float green, float blue)
+{
+	float Color[4] = { red, green, blue, 1.0f };
+	m_DeviceContext->ClearRenderTargetView(m_RTV, Color);
+	m_DeviceContext->ClearDepthStencilView(m_DSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
 HRESULT CDXGraphicsAPI::compileShaderFromFile(std::wstring fileName,

@@ -46,12 +46,6 @@ bool COGLGraphicsAPI::init(HWND window)
 	return true;
 }
 
-bool COGLGraphicsAPI::createRTV(CRTV* rtv, CTexture* tex)
-{
-	glGenFramebuffers(1, &dynamic_cast<COGLRTV*>(rtv)->m_FrameBuffer);
-	return true;
-}
-
 CTexture* COGLGraphicsAPI::createTexture(int width, int height)
 {
 	COGLTexture* Tex = new COGLTexture();
@@ -154,6 +148,18 @@ void COGLGraphicsAPI::setShaders(CShaderProgram* program)
 {
 	COGLShaderProgram* ShaderProgram = dynamic_cast<COGLShaderProgram*>(program);
 	glUseProgram(ShaderProgram->m_Program);
+}
+
+void COGLGraphicsAPI::draw(unsigned int indices)
+{
+	glDrawElements(GL_TRIANGLES, indices, GL_UNSIGNED_INT, 0);
+}
+
+void COGLGraphicsAPI::clearBackBuffer(float red, float green, float blue)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClearColor(red, green, blue, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 CBuffer* COGLGraphicsAPI::createBuffer(const void* data,
