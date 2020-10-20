@@ -150,6 +150,12 @@ void COGLGraphicsAPI::setViewport(int width, int height)
 	glViewport(0, 0, width, height);
 }
 
+void COGLGraphicsAPI::setShaders(CShaderProgram* program)
+{
+	COGLShaderProgram* ShaderProgram = dynamic_cast<COGLShaderProgram*>(program);
+	glUseProgram(ShaderProgram->m_Program);
+}
+
 CBuffer* COGLGraphicsAPI::createBuffer(const void* data,
 	unsigned int size,
 	BUFFER_TYPE type)

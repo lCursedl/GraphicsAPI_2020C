@@ -333,6 +333,15 @@ void CDXGraphicsAPI::setViewport(int width, int height)
 	m_DeviceContext->RSSetViewports(1, &vp);
 }
 
+void CDXGraphicsAPI::setShaders(CShaderProgram* program)
+{
+	CDXVertexShader* VS = dynamic_cast<CDXVertexShader*>(program->getVertexShader());
+	CDXPixelShader* PS = dynamic_cast<CDXPixelShader*>(program->getPixelShader());
+
+	m_DeviceContext->VSSetShader(VS->m_VS, NULL, 0);
+	m_DeviceContext->PSSetShader(PS->m_PS, NULL, 0);
+}
+
 HRESULT CDXGraphicsAPI::compileShaderFromFile(std::wstring fileName,
 	std::string shaderModel,
 	ID3DBlob** ppBlobOut)

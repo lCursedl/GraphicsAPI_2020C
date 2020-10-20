@@ -22,10 +22,11 @@ public:
     CBuffer* createBuffer(const void* data,
         unsigned int size,
         BUFFER_TYPE type)                                     override;
-
+    
     //DEVICE CONTEXT
 
     void setBackBuffer()                                      override;
     void setViewport(int width, int height)                   override;
+    void setShaders(CShaderProgram* program)                  override;
     
 };

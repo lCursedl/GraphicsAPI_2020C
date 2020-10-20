@@ -26,6 +26,7 @@ public:
 
     void setBackBuffer()                                      override;
     void setViewport(int width, int height)                   override;
+    void setShaders(CShaderProgram* program)                  override;
 
     //MISC
 

@@ -19,7 +19,6 @@ public:
 	virtual CTexture* createTexture(int width, int height) = 0;
 	virtual bool createRTV(CRTV * rtv, CTexture* tex = nullptr) = 0;
 	
-	//virtual void setRTV(CRTV * rtv) = 0;
 	virtual CShaderProgram* createShaderProgram(std::wstring vsfile,
 		std::wstring psfile) = 0;
 	virtual CBuffer* createBuffer(const void* data,
@@ -29,5 +28,6 @@ public:
 
 	virtual void setBackBuffer() = 0;
 	virtual void setViewport(int width, int height) = 0;
-	
+	virtual void draw();
+	virtual void setShaders(CShaderProgram* program) = 0;	
 };
