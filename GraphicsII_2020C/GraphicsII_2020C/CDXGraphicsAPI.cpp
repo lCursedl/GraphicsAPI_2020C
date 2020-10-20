@@ -145,66 +145,100 @@ bool CDXGraphicsAPI::createRTV(CRTV* rtv, CTexture* tex)
 	return false;
 }
 
-bool CDXGraphicsAPI::createTexture(CTexture* tex, CRTV* rtv)
+CTexture* CDXGraphicsAPI::createTexture(int width, int height)
 {
 	if (m_Device != nullptr)
 	{
-		//Cast abstract type to specific
-		CDXTexture* T = dynamic_cast<CDXTexture*>(tex);
-		//Create 2D texture
-		HRESULT hr = m_Device->CreateTexture2D(&T->m_Desc, NULL, &T->m_pTexture);
-		//Check for errors in texture creation
+		CDXTexture* DXTexture = new CDXTexture();
+
+		//Create texture descriptor
+		D3D11_TEXTURE2D_DESC Desc;
+		ZeroMemory(&Desc, sizeof(Desc));
+
+		Desc.Width = width;
+		Desc.Height = height;
+		Desc.MipLevels = 1;
+		Desc.ArraySize = 1;
+		Desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+		Desc.SampleDesc.Count = 1;
+		Desc.SampleDesc.Quality = 0;
+		Desc.Usage = D3D11_USAGE_DEFAULT;
+		Desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+		Desc.MiscFlags = 0;
+
+		//Create texture with descriptor
+		HRESULT hr = m_Device->CreateTexture2D(&Desc, NULL, &DXTexture->m_pTexture);
 		if (FAILED(hr))
 		{
-			return false;
+			delete DXTexture;
+			return nullptr;
 		}
-		return true;
-	}	
-	return false;
+
+		//Create RTV from texture
+		hr = m_Device->CreateRenderTargetView(
+			DXTexture->m_pTexture,
+			NULL,
+			&DXTexture->m_pRTV);
+		if (FAILED(hr))
+		{
+			delete DXTexture;
+			return nullptr;
+		}
+
+		//Create Depthstencil texture
+		Desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		Desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+
+		hr = m_Device->CreateTexture2D(&Desc, NULL, &DXTexture->m_pDepthTexture);
+
+		if (FAILED(hr))
+		{
+			delete DXTexture;
+			return nullptr;
+		}
+
+		//Create Depth stencil view
+		D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
+		ZeroMemory(&descDSV, sizeof(descDSV));
+		descDSV.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+		descDSV.Texture2D.MipSlice = 0;
+
+		hr = m_Device->CreateDepthStencilView(
+			DXTexture->m_pDepthTexture,
+			&descDSV,
+			&DXTexture->m_pDSV);
+
+		if (FAILED(hr))
+		{
+			delete DXTexture;
+			return nullptr;
+		}
+
+		return DXTexture;
+	}
 }
 
 CShaderProgram* CDXGraphicsAPI::createShaderProgram(std::wstring vsfile,
 	std::wstring psfile)
 {
-	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-	ID3DBlob* ErrorBlob;
-	HRESULT hr;
 
 	CDXVertexShader* VS = new CDXVertexShader();
-	hr = D3DX11CompileFromFile(vsfile.c_str(),
-		NULL,
-		NULL,
-		"main",
-		"vs_4_0",
-		dwShaderFlags,
-		0,
-		NULL,
-		&VS->m_Blob,
-		&ErrorBlob,
-		NULL);
 	
-	if (FAILED(hr))
+	//Compile vertex shader file and check for errors
+	if (FAILED(compileShaderFromFile(vsfile, "vs_4_0", &VS->m_Blob)))
 	{
-		if (ErrorBlob != NULL)
-		{
-			OutputDebugStringA((char*)ErrorBlob->GetBufferPointer());
-			ErrorBlob->Release();
-		}
 		VS->clear();
 		delete VS;
 		return nullptr;
 	}
-	if (ErrorBlob)
-	{
-		ErrorBlob->Release();
-	}
 
-	hr = m_Device->CreateVertexShader(VS->m_Blob->GetBufferPointer(),
-		VS->m_Blob->GetBufferSize(),
-		NULL,
-		&VS->m_VS);
-
-	if (FAILED(hr))
+	//Create vertex shader from compilation and check errors
+	if (FAILED(m_Device->CreateVertexShader(
+							VS->m_Blob->GetBufferPointer(),
+							VS->m_Blob->GetBufferSize(),
+							NULL,
+							&VS->m_VS)))
 	{
 		VS->clear();
 		delete VS;
@@ -212,28 +246,10 @@ CShaderProgram* CDXGraphicsAPI::createShaderProgram(std::wstring vsfile,
 	}
 
 	CDXPixelShader* PS = new CDXPixelShader();
-	hr = D3DX11CompileFromFile(psfile.c_str(),
-		NULL,
-		NULL,
-		"main",
-		"ps_4_0",
-		dwShaderFlags,
-		0,
-		NULL,
-		&PS->m_Blob,
-		&ErrorBlob,
-		NULL);
 
-	if (FAILED(hr))
+	//Compile pixel shader file and check for errors
+	if (FAILED(compileShaderFromFile(psfile, "ps_4_0", &PS->m_Blob)))
 	{
-		if (ErrorBlob != NULL)
-		{
-			OutputDebugStringA((char*)ErrorBlob->GetBufferPointer());
-		}
-		if (ErrorBlob)
-		{
-			ErrorBlob->Release();
-		}
 		VS->clear();
 		delete VS;
 		PS->clear();
@@ -241,12 +257,12 @@ CShaderProgram* CDXGraphicsAPI::createShaderProgram(std::wstring vsfile,
 		return nullptr;
 	}
 
-	hr = m_Device->CreatePixelShader(PS->m_Blob->GetBufferPointer(),
-		PS->m_Blob->GetBufferSize(),
-		NULL,
-		&PS->m_PS);
-
-	if (FAILED(hr))
+	//Create pixel shader from compilation and check for errors
+	if (FAILED(m_Device->CreatePixelShader(
+						PS->m_Blob->GetBufferPointer(),
+						PS->m_Blob->GetBufferSize(),
+						NULL,
+						&PS->m_PS)))
 	{
 		VS->clear();
 		delete VS;
@@ -315,4 +331,40 @@ void CDXGraphicsAPI::setViewport(int width, int height)
 	vp.TopLeftX = 0.f;
 	vp.TopLeftY = 0.f;
 	m_DeviceContext->RSSetViewports(1, &vp);
+}
+
+HRESULT CDXGraphicsAPI::compileShaderFromFile(std::wstring fileName,
+	std::string shaderModel,
+	ID3DBlob** ppBlobOut)
+{
+	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+	ID3DBlob* pErrorBlob;
+	
+	HRESULT hr = D3DX11CompileFromFile(fileName.c_str(),
+		NULL,
+		NULL,
+		"main",
+		shaderModel.c_str(),
+		dwShaderFlags,
+		0,
+		NULL,
+		ppBlobOut,
+		&pErrorBlob,
+		NULL);
+
+	if (FAILED(hr))
+	{
+		if (pErrorBlob != NULL)
+		{
+			OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
+			pErrorBlob->Release();
+			return hr;
+		}
+	}
+	if (pErrorBlob)
+	{
+		pErrorBlob->Release();
+	}
+
+	return S_OK;
 }

@@ -13,7 +13,7 @@ public:
     //DEVICE
 
     bool createRTV(CRTV* rtv, CTexture* tex = nullptr)        override;
-    bool createTexture(CTexture* tex, CRTV* rtv = nullptr)    override;
+    CTexture* createTexture(int width, int height)            override;
 
     CShaderProgram* createShaderProgram(std::wstring vsfile,
         std::wstring psfile)                                  override;
@@ -29,7 +29,9 @@ public:
 
     //MISC
 
-    void compileFile();
+    HRESULT compileShaderFromFile(std::wstring fileName,
+        std::string shaderModel,
+        ID3DBlob** ppBlobOut);
 
 private:
     D3D_DRIVER_TYPE         m_DriverType;
