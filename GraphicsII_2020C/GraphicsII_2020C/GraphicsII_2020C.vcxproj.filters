@@ -96,14 +96,17 @@
     <ClInclude Include="CDXShaderProgram.h">
       <Filter>Header Files\DirectX</Filter>
     </ClInclude>
-    <ClInclude Include="COGLShaderProgram.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CDXInputLayout.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CInputLayout.h">
       <Filter>Header Files\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="CDXInputLayout.h">
+      <Filter>Header Files\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="COGLShaderProgram.h">
+      <Filter>Header Files\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="COGLInputLayout.h">
+      <Filter>Header Files\OpenGL</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -173,14 +176,17 @@
     <ClCompile Include="CDXShaderProgram.cpp">
       <Filter>Source Files\DirectX</Filter>
     </ClCompile>
-    <ClCompile Include="COGLShaderProgram.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="CDXInputLayout.cpp">
+      <Filter>Source Files\DirectX</Filter>
     </ClCompile>
     <ClCompile Include="CInputLayout.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Base</Filter>
     </ClCompile>
-    <ClCompile Include="CDXInputLayout.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="COGLShaderProgram.cpp">
+      <Filter>Source Files\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="COGLInputLayout.cpp">
+      <Filter>Source Files\OpenGL</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

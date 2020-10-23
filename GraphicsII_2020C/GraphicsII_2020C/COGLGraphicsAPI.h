@@ -15,13 +15,14 @@ public:
 
     //DEVICE
 
-    CTexture* createTexture(int width, int height)    override;
+    CTexture* createTexture(int width, int height)            override;
     CShaderProgram* createShaderProgram(std::wstring vsfile,
         std::wstring psfile)                                  override;
     CBuffer* createBuffer(const void* data,
         unsigned int size,
         BUFFER_TYPE type)                                     override;
-    
+    CInputLayout* createInputLayout(CShaderProgram* program,
+        LAYOUT_DESC desc)                                     override;
     //DEVICE CONTEXT
 
     void setBackBuffer()                                      override;
@@ -29,4 +30,5 @@ public:
     void setShaders(CShaderProgram* program)                  override;
     void draw(unsigned int indices)                           override;
     void clearBackBuffer(float red, float green, float blue)  override;
+    void setInputLayout(CInputLayout* layout)                 override;
 };

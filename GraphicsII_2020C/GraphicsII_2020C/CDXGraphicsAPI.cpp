@@ -423,6 +423,12 @@ void CDXGraphicsAPI::clearBackBuffer(float red, float green, float blue)
 	m_DeviceContext->ClearDepthStencilView(m_DSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
+void CDXGraphicsAPI::setInputLayout(CInputLayout* layout)
+{
+	m_DeviceContext->IASetInputLayout(
+		dynamic_cast<CDXInputLayout*>(layout)->m_InputLayout);
+}
+
 HRESULT CDXGraphicsAPI::compileShaderFromFile(std::wstring fileName,
 	std::string shaderModel,
 	ID3DBlob** ppBlobOut)

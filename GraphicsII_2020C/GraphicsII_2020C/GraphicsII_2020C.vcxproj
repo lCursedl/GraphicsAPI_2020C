@@ -167,6 +167,7 @@
     <ClInclude Include="CMesh.h" />
     <ClInclude Include="COGLBuffer.h" />
     <ClInclude Include="COGLGraphicsAPI.h" />
+    <ClInclude Include="COGLInputLayout.h" />
     <ClInclude Include="COGLPixelShader.h" />
     <ClInclude Include="COGLRTV.h" />
     <ClInclude Include="COGLShaderProgram.h" />
@@ -193,6 +194,7 @@
     <ClCompile Include="CMesh.cpp" />
     <ClCompile Include="COGLBuffer.cpp" />
     <ClCompile Include="COGLGraphicsAPI.cpp" />
+    <ClCompile Include="COGLInputLayout.cpp" />
     <ClCompile Include="COGLPixelShader.cpp" />
     <ClCompile Include="COGLRTV.cpp" />
     <ClCompile Include="COGLShaderProgram.cpp" />

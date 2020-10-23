@@ -5,6 +5,7 @@
 #include "COGLPixelShader.h"
 #include "COGLBuffer.h"
 #include "COGLShaderProgram.h"
+#include "COGLInputLayout.h"
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -162,6 +163,11 @@ void COGLGraphicsAPI::clearBackBuffer(float red, float green, float blue)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
+void COGLGraphicsAPI::setInputLayout(CInputLayout* layout)
+{
+	glBindVertexArray(dynamic_cast<COGLInputLayout*>(layout)->VAO);
+}
+
 CBuffer* COGLGraphicsAPI::createBuffer(const void* data,
 	unsigned int size,
 	BUFFER_TYPE type)
@@ -186,4 +192,35 @@ CBuffer* COGLGraphicsAPI::createBuffer(const void* data,
 
 	glBindBuffer(OGLBuffer->m_Type, OGLBuffer->m_Buffer);
 	glBufferData(OGLBuffer->m_Type, OGLBuffer->m_Size, data, GL_STATIC_DRAW);
+}
+
+CInputLayout* COGLGraphicsAPI::createInputLayout(CShaderProgram* program, LAYOUT_DESC desc)
+{
+	COGLInputLayout* ILayout = new COGLInputLayout();
+	glBindVertexArray(ILayout->VAO);
+	int size = 0;
+	for (int i = 0; i < desc.v_Layout.size(); i++)
+	{
+		switch (desc.v_Layout[i].s_Format)
+		{
+		case VEC_F:
+			size = 1;
+			break;
+		case VEC_2F:
+			size = 2;
+			break;
+		case VEC_3F:
+			size = 3;
+			break;
+		case VEC_4F:
+			size = 4;
+			break;
+		}
+
+		glVertexAttribFormat(i, size, GL_FLOAT, GL_FALSE, desc.v_Layout[i].s_Offset);
+		glVertexAttribBinding(i, 0);
+		glEnableVertexAttribArray(i);
+	}
+	glBindVertexArray(0);
+	return ILayout;
 }

@@ -31,6 +31,7 @@ public:
     void setShaders(CShaderProgram* program)                  override;
     void draw(unsigned int indices)                           override;
     void clearBackBuffer(float red, float green, float blue)  override;
+    void setInputLayout(CInputLayout* layout)                 override;
     //MISC
 
     HRESULT compileShaderFromFile(std::wstring fileName,
