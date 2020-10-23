@@ -21,6 +21,9 @@ public:
         unsigned int size,
         BUFFER_TYPE type)                                     override;
 
+    CInputLayout* createInputLayout(CShaderProgram* program,
+        LAYOUT_DESC desc)                                     override;
+
     //DEVICE CONTEXT
 
     void setBackBuffer()                                      override;

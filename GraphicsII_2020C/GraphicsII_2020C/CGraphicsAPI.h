@@ -5,6 +5,7 @@
 #include "CShader.h"
 #include "CBuffer.h"
 #include "CShaderProgram.h"
+#include "CInputLayout.h"
 
 #include <string>
 
@@ -22,11 +23,15 @@ public:
 	virtual CBuffer* createBuffer(const void* data,
 		unsigned int size,
 		BUFFER_TYPE type) = 0;
+	virtual CInputLayout* createInputLayout(CShaderProgram* program,
+		LAYOUT_DESC desc) = 0;
+
 	//DEVICE CONTEXT
 
 	virtual void setBackBuffer() = 0;
 	virtual void setViewport(int width, int height) = 0;
 	virtual void draw(unsigned int indices) = 0;
 	virtual void setShaders(CShaderProgram* program) = 0;
+	virtual void setInputLayout(CInputLayout* layout) = 0;
 	virtual void clearBackBuffer(float red, float green, float blue) = 0;
 };

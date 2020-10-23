@@ -3,6 +3,7 @@
 #include "CDXRTV.h"
 #include "CDXBuffer.h"
 #include "CDXShaderProgram.h"
+#include "CDXInputLayout.h"
 
 bool CDXGraphicsAPI::init(HWND window)
 {
@@ -296,6 +297,92 @@ CBuffer* CDXGraphicsAPI::createBuffer(const void* data,
 		return nullptr;
 	}
 	return DXBuffer;
+}
+
+CInputLayout* CDXGraphicsAPI::createInputLayout(CShaderProgram* program,
+	LAYOUT_DESC desc)
+{
+	std::vector<D3D11_INPUT_ELEMENT_DESC> layout;
+
+	unsigned int texcoordindex = 0;
+	unsigned int positionindex = 0;
+	unsigned int normalindex = 0;
+	unsigned int binormalindex = 0;
+	unsigned int tangentindex = 0;
+
+	D3D11_INPUT_ELEMENT_DESC D;
+
+	for (int i = 0; i < desc.v_Layout.size(); i++)
+	{
+		//SEMANTIC NAME & INDEX
+		switch (desc.v_Layout[i].s_Semantic)
+		{
+		case POSITION:
+			D.SemanticName = "POSITION";
+			D.SemanticIndex = positionindex;
+			positionindex++;
+			break;
+		case TEXCOORD:
+			D.SemanticName = "TEXCOORD";
+			D.SemanticIndex = texcoordindex;
+			texcoordindex++;
+			break;
+		case NORMAL:
+			D.SemanticName = "NORMAL";
+			D.SemanticIndex = normalindex;
+			normalindex++;
+			break;
+		case BINORMAL:
+			D.SemanticName = "BINORMAL";
+			D.SemanticIndex = binormalindex;
+			binormalindex++;
+			break;
+		case TANGENT:
+			D.SemanticName = "TANGENT";
+			D.SemanticIndex = tangentindex;
+			tangentindex++;
+			break;
+		}
+		//FORMAT
+		switch (desc.v_Layout[i].s_Format)
+		{
+		case VEC_F:
+			D.Format = DXGI_FORMAT_R32_FLOAT;
+			break;
+		case VEC_2F:
+			D.Format = DXGI_FORMAT_R32G32_FLOAT;
+			break;
+		case VEC_3F:
+			D.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+			break;
+		case VEC_4F:
+			D.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			break;
+		}
+
+		D.InputSlot = 0;
+		D.AlignedByteOffset = desc.v_Layout[i].s_Offset;
+		D.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+		D.InstanceDataStepRate = 0;
+
+		layout.push_back(D);
+	}
+
+	CDXVertexShader* VS = dynamic_cast<CDXVertexShader*>(program->getVertexShader());
+
+	CDXInputLayout* ILayout = new CDXInputLayout();	
+
+	if (FAILED(m_Device->CreateInputLayout(layout.data(),
+		layout.size(),
+		VS->m_Blob->GetBufferPointer(),
+		VS->m_Blob->GetBufferSize(),
+		&ILayout->m_InputLayout)))
+	{
+		delete ILayout;
+		return nullptr;
+	}
+
+	return ILayout;
 }
 
 void CDXGraphicsAPI::setBackBuffer()
