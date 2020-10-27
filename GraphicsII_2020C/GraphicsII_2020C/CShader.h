@@ -10,16 +10,12 @@ class CVertexShader
 {
 public:
 	CVertexShader() {}
-	~CVertexShader() {}
-
-	virtual void clear() = 0;
+	virtual ~CVertexShader() {}
 };
 
 class CPixelShader
 {
 public:
 	CPixelShader() {}
-	~CPixelShader() {}
-
-	virtual void clear() = 0;
+	virtual ~CPixelShader() {}
 };

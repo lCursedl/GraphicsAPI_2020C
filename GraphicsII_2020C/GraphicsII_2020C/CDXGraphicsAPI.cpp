@@ -75,18 +75,27 @@ bool CDXGraphicsAPI::init(HWND window)
 		return false;
 	}
 
+	CDXTexture* backBuffer = dynamic_cast<CDXTexture*>(m_BackBuffer);
+
 	//Create RTV
-	hr = m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&m_BackBuffer);
+	hr = m_SwapChain->GetBuffer(0,
+		__uuidof(ID3D11Texture2D),
+		(LPVOID*)
+		backBuffer->m_pTexture);
 	if (FAILED(hr))
 	{
 		return false;
 	}
 
-	hr = m_Device->CreateRenderTargetView(m_BackBuffer, NULL, &m_RTV);
+	hr = m_Device->CreateRenderTargetView(
+		backBuffer->m_pTexture,
+		NULL, &backBuffer->m_pRTV);
 	if (FAILED(hr))
 	{
 		return false;
 	}
+
+	CDXTexture* depthTexture = dynamic_cast<CDXTexture*>(m_DepthStencil);
 
 	//Create depth stencil texture
 	D3D11_TEXTURE2D_DESC descDepth;
@@ -102,7 +111,7 @@ bool CDXGraphicsAPI::init(HWND window)
 	descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 	descDepth.CPUAccessFlags = 0;
 	descDepth.MiscFlags = 0;
-	hr = m_Device->CreateTexture2D(&descDepth, NULL, &m_DepthStencil);
+	hr = m_Device->CreateTexture2D(&descDepth, NULL, &depthTexture->m_pTexture);
 	if (FAILED(hr))
 	{
 		return false;
@@ -113,14 +122,16 @@ bool CDXGraphicsAPI::init(HWND window)
 	descDSV.Format = descDepth.Format;
 	descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	descDSV.Texture2D.MipSlice = 0;
-	hr = m_Device->CreateDepthStencilView(m_DepthStencil, &descDSV, &m_DSV);
+	hr = m_Device->CreateDepthStencilView(depthTexture->m_pTexture,
+		&descDSV,
+		&depthTexture->m_pDSV);
 	if (FAILED(hr))
 	{
 		return false;
 	}
 
 	//Set main RTV and DSV by default
-	m_DeviceContext->OMSetRenderTargets(1, &m_RTV, m_DSV);
+	m_DeviceContext->OMSetRenderTargets(1, &backBuffer->m_pRTV, depthTexture->m_pDSV);
 
 	//Set Viewport
 	setViewport(width, height);
@@ -205,14 +216,18 @@ CTexture* CDXGraphicsAPI::createTexture(int width, int height)
 CShaderProgram* CDXGraphicsAPI::createShaderProgram(std::wstring vsfile,
 	std::wstring psfile)
 {
-
-	CDXVertexShader* VS = new CDXVertexShader();
+	CDXShaderProgram* ShaderProgram = new CDXShaderProgram();
+	CDXVertexShader* VS = 
+		dynamic_cast<CDXVertexShader*>(ShaderProgram->getVertexShader());
+	CDXPixelShader* PS =
+		dynamic_cast<CDXPixelShader*>(ShaderProgram->getPixelShader());
 	
 	//Compile vertex shader file and check for errors
-	if (FAILED(compileShaderFromFile(vsfile, "vs_4_0", &VS->m_Blob)))
+	if (FAILED(compileShaderFromFile(vsfile,
+		"vs_4_0",
+		&VS->m_Blob)))
 	{
-		VS->clear();
-		delete VS;
+		delete ShaderProgram;
 		return nullptr;
 	}
 
@@ -223,20 +238,14 @@ CShaderProgram* CDXGraphicsAPI::createShaderProgram(std::wstring vsfile,
 							NULL,
 							&VS->m_VS)))
 	{
-		VS->clear();
-		delete VS;
+		delete ShaderProgram;
 		return nullptr;
 	}
-
-	CDXPixelShader* PS = new CDXPixelShader();
 
 	//Compile pixel shader file and check for errors
 	if (FAILED(compileShaderFromFile(psfile, "ps_4_0", &PS->m_Blob)))
 	{
-		VS->clear();
-		delete VS;
-		PS->clear();
-		delete PS;
+		delete ShaderProgram;
 		return nullptr;
 	}
 
@@ -247,19 +256,11 @@ CShaderProgram* CDXGraphicsAPI::createShaderProgram(std::wstring vsfile,
 						NULL,
 						&PS->m_PS)))
 	{
-		VS->clear();
-		delete VS;
-		PS->clear();
-		delete PS;
+		delete ShaderProgram;
 		return nullptr;
 	}
 
-	CDXShaderProgram* ShaderProgram = new CDXShaderProgram();
-	ShaderProgram->setVertexShader(VS);
-	ShaderProgram->setPixelShader(PS);
-
 	return ShaderProgram;
-
 }
 
 CBuffer* CDXGraphicsAPI::createBuffer(const void* data,
@@ -387,7 +388,10 @@ CInputLayout* CDXGraphicsAPI::createInputLayout(CShaderProgram* program,
 
 void CDXGraphicsAPI::setBackBuffer()
 {
-	m_DeviceContext->OMSetRenderTargets(1, &m_RTV, m_DSV);
+
+	m_DeviceContext->OMSetRenderTargets(1,
+		&dynamic_cast<CDXTexture*>(m_BackBuffer)->m_pRTV,
+		dynamic_cast<CDXTexture*>(m_DepthStencil)->m_pDSV);
 }
 
 void CDXGraphicsAPI::setViewport(int width, int height)
@@ -411,7 +415,7 @@ void CDXGraphicsAPI::setShaders(CShaderProgram* program)
 	m_DeviceContext->PSSetShader(PS->m_PS, NULL, 0);
 }
 
-void CDXGraphicsAPI::draw(unsigned int indices)
+void CDXGraphicsAPI::drawIndexed(unsigned int indices)
 {
 	m_DeviceContext->DrawIndexed(indices, 0, 0);
 }
@@ -419,8 +423,14 @@ void CDXGraphicsAPI::draw(unsigned int indices)
 void CDXGraphicsAPI::clearBackBuffer(float red, float green, float blue)
 {
 	float Color[4] = { red, green, blue, 1.0f };
-	m_DeviceContext->ClearRenderTargetView(m_RTV, Color);
-	m_DeviceContext->ClearDepthStencilView(m_DSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	m_DeviceContext->ClearRenderTargetView(
+		dynamic_cast<CDXTexture*>(m_BackBuffer)->m_pRTV,
+		Color);
+	m_DeviceContext->ClearDepthStencilView(
+		dynamic_cast<CDXTexture*>(m_DepthStencil)->m_pDSV,
+		D3D11_CLEAR_DEPTH,
+		1.0f,
+		0);
 }
 
 void CDXGraphicsAPI::setInputLayout(CInputLayout* layout)

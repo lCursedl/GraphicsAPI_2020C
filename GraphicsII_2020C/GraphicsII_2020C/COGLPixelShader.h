@@ -9,7 +9,8 @@ public:
     COGLPixelShader();
     ~COGLPixelShader();
 
-    void clear()                override;
-
+private:
     unsigned int m_PS;
+
+    friend class COGLGraphicsAPI;
 };

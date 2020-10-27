@@ -10,9 +10,11 @@ public:
     COGLBuffer();
     ~COGLBuffer();
 
-    void clear()                                    override;
+private:
 
     GLenum m_Type;
     unsigned int m_Size;
     unsigned int m_Buffer;
+
+    friend class COGLGraphicsAPI;
 };

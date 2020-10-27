@@ -4,12 +4,9 @@ CDXVertexShader::CDXVertexShader()
 {
 	m_Blob = NULL;
 	m_VS = NULL;
-	m_InputLayout = NULL;
 }
 
-CDXVertexShader::~CDXVertexShader(){}
-
-void CDXVertexShader::clear()
+CDXVertexShader::~CDXVertexShader()
 {
 	if (m_Blob)
 	{
@@ -18,9 +15,5 @@ void CDXVertexShader::clear()
 	if (m_VS)
 	{
 		m_VS->Release();
-	}
-	if (m_InputLayout)
-	{
-		m_InputLayout->Release();
 	}
 }

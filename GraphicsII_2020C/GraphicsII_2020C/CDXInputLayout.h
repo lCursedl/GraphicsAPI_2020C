@@ -7,8 +7,11 @@ class CDXInputLayout :
 {
 public:
     CDXInputLayout();
+    ~CDXInputLayout();
 
-    void clear()                        override;
+private:
 
     ID3D11InputLayout* m_InputLayout = nullptr;
+
+    friend class CDXGraphicsAPI;
 };

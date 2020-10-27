@@ -6,9 +6,7 @@ CDXBuffer::CDXBuffer()
 	ZeroMemory(&m_Desc, sizeof(m_Desc));
 }
 
-CDXBuffer::~CDXBuffer(){}
-
-void CDXBuffer::clear()
+CDXBuffer::~CDXBuffer()
 {
 	if (m_Buffer)
 	{

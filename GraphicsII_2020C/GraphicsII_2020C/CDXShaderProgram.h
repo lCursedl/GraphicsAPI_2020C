@@ -8,5 +8,4 @@ class CDXShaderProgram :
 {
 public:
     CDXShaderProgram();
-    ~CDXShaderProgram();
 };

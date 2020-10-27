@@ -11,11 +11,5 @@ class CBuffer
 {
 public:
 	CBuffer() {}
-
-	virtual ~CBuffer()
-	{
-		clear();
-	}
-
-	virtual void clear(){}
+	virtual ~CBuffer() {}
 };

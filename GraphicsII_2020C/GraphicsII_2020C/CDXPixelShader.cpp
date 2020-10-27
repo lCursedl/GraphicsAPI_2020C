@@ -6,9 +6,7 @@ CDXPixelShader::CDXPixelShader()
 	m_Blob = NULL;
 }
 
-CDXPixelShader::~CDXPixelShader(){}
-
-void CDXPixelShader::clear()
+CDXPixelShader::~CDXPixelShader()
 {
 	if (m_PS)
 	{

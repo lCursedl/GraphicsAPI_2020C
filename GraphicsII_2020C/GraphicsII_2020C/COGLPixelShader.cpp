@@ -5,9 +5,7 @@ COGLPixelShader::COGLPixelShader()
 	m_PS = 0;
 }
 
-COGLPixelShader::~COGLPixelShader(){}
-
-void COGLPixelShader::clear()
+COGLPixelShader::~COGLPixelShader()
 {
 	glDeleteShader(m_PS);
 }

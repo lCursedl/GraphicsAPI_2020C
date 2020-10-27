@@ -2,7 +2,7 @@
 
 CDXInputLayout::CDXInputLayout(){}
 
-void CDXInputLayout::clear()
+CDXInputLayout::~CDXInputLayout()
 {
 	if (m_InputLayout)
 	{

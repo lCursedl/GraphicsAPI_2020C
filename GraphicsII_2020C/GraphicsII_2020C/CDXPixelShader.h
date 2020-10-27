@@ -10,8 +10,9 @@ public:
     CDXPixelShader();
     ~CDXPixelShader();
 
-    void clear()                override;
-
+private:
     ID3D11PixelShader* m_PS;
     ID3DBlob* m_Blob;
+
+    friend class CDXGraphicsAPI;
 };

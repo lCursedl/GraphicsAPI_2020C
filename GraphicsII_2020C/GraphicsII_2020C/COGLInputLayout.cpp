@@ -1,10 +1,8 @@
 #include "COGLInputLayout.h"
 
-COGLInputLayout::COGLInputLayout()
-{
-}
+COGLInputLayout::COGLInputLayout(){}
 
-void COGLInputLayout::clear()
+COGLInputLayout::~COGLInputLayout()
 {
 	glDeleteVertexArrays(1, &VAO);
 }

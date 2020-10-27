@@ -29,14 +29,9 @@ public:
     void setBackBuffer()                                      override;
     void setViewport(int width, int height)                   override;
     void setShaders(CShaderProgram* program)                  override;
-    void draw(unsigned int indices)                           override;
+    void drawIndexed(unsigned int indices)                           override;
     void clearBackBuffer(float red, float green, float blue)  override;
-    void setInputLayout(CInputLayout* layout)                 override;
-    //MISC
-
-    HRESULT compileShaderFromFile(std::wstring fileName,
-        std::string shaderModel,
-        ID3DBlob** ppBlobOut);
+    void setInputLayout(CInputLayout* layout)                 override;   
 
 private:
     D3D_DRIVER_TYPE         m_DriverType;
@@ -45,8 +40,12 @@ private:
     ID3D11Device*           m_Device;
     ID3D11DeviceContext*    m_DeviceContext;
     IDXGISwapChain*         m_SwapChain;
-    ID3D11Texture2D*        m_BackBuffer;
-    ID3D11RenderTargetView* m_RTV;
-    ID3D11Texture2D*        m_DepthStencil;
-    ID3D11DepthStencilView* m_DSV;
+    CTexture*               m_BackBuffer;
+    CTexture*               m_DepthStencil;
+
+
+
+    HRESULT compileShaderFromFile(std::wstring fileName,
+        std::string shaderModel,
+        ID3DBlob** ppBlobOut);
 };    

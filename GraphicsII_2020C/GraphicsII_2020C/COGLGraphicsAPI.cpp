@@ -78,7 +78,13 @@ CShaderProgram* COGLGraphicsAPI::createShaderProgram(std::wstring vsfile,
 	int result;
 	char log[512];
 	source = readShaderFile(vsfile);
-	COGLVertexShader* VS = new COGLVertexShader();
+
+	COGLShaderProgram* ShaderProgram = new COGLShaderProgram();
+	COGLVertexShader* VS =
+		dynamic_cast<COGLVertexShader*>(ShaderProgram->getVertexShader());
+	COGLPixelShader* PS = 
+		dynamic_cast<COGLPixelShader*>(ShaderProgram->getPixelShader());
+
 	VS->m_VertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(VS->m_VertexShader, 1, &source, NULL);
 	glCompileShader(VS->m_VertexShader);
@@ -88,13 +94,12 @@ CShaderProgram* COGLGraphicsAPI::createShaderProgram(std::wstring vsfile,
 	{
 		glGetShaderInfoLog(VS->m_VertexShader, 512, NULL, log);
 		OutputDebugStringA(log);
-		VS->clear();
-		delete VS;
+		delete ShaderProgram;
 		return nullptr;
 	}
 
 	source = readShaderFile(psfile);
-	COGLPixelShader* PS = new COGLPixelShader();
+	
 	PS->m_PS = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(PS->m_PS, 1, &source, NULL);
 	glCompileShader(PS->m_PS);
@@ -104,16 +109,9 @@ CShaderProgram* COGLGraphicsAPI::createShaderProgram(std::wstring vsfile,
 	{
 		glGetShaderInfoLog(PS->m_PS, 512, NULL, log);
 		OutputDebugStringA(log);
-		VS->clear();
-		delete VS;
-		PS->clear();
-		delete PS;
+		delete ShaderProgram;
 		return nullptr;
 	}
-
-	COGLShaderProgram* ShaderProgram = new COGLShaderProgram();
-	ShaderProgram->setVertexShader(VS);
-	ShaderProgram->setPixelShader(PS);
 
 	ShaderProgram->m_Program = glCreateProgram();
 	glAttachShader(ShaderProgram->m_Program, VS->m_VertexShader);
@@ -125,10 +123,7 @@ CShaderProgram* COGLGraphicsAPI::createShaderProgram(std::wstring vsfile,
 	{
 		glGetProgramInfoLog(ShaderProgram->m_Program, 512, NULL, log);
 		OutputDebugStringA(log);
-		ShaderProgram->clear();
 		delete ShaderProgram;
-		delete VS;
-		delete PS;
 		return nullptr;
 	}
 

@@ -7,8 +7,12 @@ class COGLTexture :
 {
 public:
     COGLTexture();
-	void clear()                override;
+    ~COGLTexture();
+
+private:
 
     unsigned int m_iTexture;
     unsigned int m_iRenderBuffer;
+
+    friend class COGLGraphicsAPI;
 };

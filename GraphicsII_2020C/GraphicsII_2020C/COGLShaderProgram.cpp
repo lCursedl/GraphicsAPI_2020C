@@ -2,4 +2,7 @@
 
 COGLShaderProgram::COGLShaderProgram(){}
 
-COGLShaderProgram::~COGLShaderProgram(){}
+COGLShaderProgram::~COGLShaderProgram()
+{
+	glDeleteProgram(m_Program);
+}

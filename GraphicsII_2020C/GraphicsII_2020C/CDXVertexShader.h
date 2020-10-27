@@ -9,9 +9,10 @@ public:
     CDXVertexShader();
     ~CDXVertexShader();
 
-    void clear()            override;
+private:
 
     ID3DBlob* m_Blob;
     ID3D11VertexShader* m_VS;
-    ID3D11InputLayout* m_InputLayout;
+
+    friend class CDXGraphicsAPI;
 };

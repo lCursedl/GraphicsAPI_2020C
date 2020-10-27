@@ -9,6 +9,21 @@
 
 #include <string>
 
+struct Color
+{
+	Color(float r, float g, float b, float a)
+	{
+		R = r;
+		G = g;
+		B = b;
+		A = a;
+	}
+	float R;
+	float G;
+	float B;
+	float A;
+};
+
 class CGraphicsAPI
 {
 public:
@@ -17,7 +32,7 @@ public:
 
 	//DEVICE
 	
-	virtual CTexture* createTexture(int width, int height) = 0;	
+	virtual CTexture* createTexture(int width, int height) = 0;
 	virtual CShaderProgram* createShaderProgram(std::wstring vsfile,
 		std::wstring psfile) = 0;
 	virtual CBuffer* createBuffer(const void* data,
@@ -30,7 +45,7 @@ public:
 
 	virtual void setBackBuffer() = 0;
 	virtual void setViewport(int width, int height) = 0;
-	virtual void draw(unsigned int indices) = 0;
+	virtual void drawIndexed(unsigned int indices) = 0;
 	virtual void setShaders(CShaderProgram* program) = 0;
 	virtual void setInputLayout(CInputLayout* layout) = 0;
 	virtual void clearBackBuffer(float red, float green, float blue) = 0;

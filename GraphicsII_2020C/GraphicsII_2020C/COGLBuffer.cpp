@@ -2,9 +2,7 @@
 
 COGLBuffer::COGLBuffer(){}
 
-COGLBuffer::~COGLBuffer(){}
-
-void COGLBuffer::clear()
+COGLBuffer::~COGLBuffer()
 {
 	glDeleteBuffers(1, &m_Buffer);
 }

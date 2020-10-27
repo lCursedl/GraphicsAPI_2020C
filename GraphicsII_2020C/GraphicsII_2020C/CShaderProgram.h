@@ -4,16 +4,17 @@
 class CShaderProgram
 {
 public:
-	CShaderProgram() {}
-	virtual ~CShaderProgram() 
+	CShaderProgram(){}
+	virtual ~CShaderProgram()
 	{
-		clear();
-	}
-
-	virtual void clear()
-	{
-		m_pVertexShader->clear();
-		m_pPixelShader->clear();
+		if (m_pVertexShader)
+		{
+			delete m_pVertexShader;
+		}
+		if (m_pPixelShader)
+		{
+			delete m_pPixelShader;
+		}
 	}
 
 	CVertexShader* getVertexShader()

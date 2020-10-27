@@ -9,8 +9,10 @@ public:
     CDXBuffer();
     ~CDXBuffer();
 
-    void clear()                                    override;
+private:
 
     ID3D11Buffer* m_Buffer;
     D3D11_BUFFER_DESC m_Desc;
+
+    friend class CDXGraphicsAPI;
 };

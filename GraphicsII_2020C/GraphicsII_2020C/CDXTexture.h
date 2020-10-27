@@ -6,10 +6,14 @@ class CDXTexture :
 {
 public:
     CDXTexture();
-	void clear()				override;
+	~CDXTexture();
 
-	ID3D11Texture2D*		m_pTexture		= nullptr;
-	ID3D11Texture2D*		m_pDepthTexture = nullptr;
-	ID3D11RenderTargetView* m_pRTV			= nullptr;
-	ID3D11DepthStencilView* m_pDSV			= nullptr;
+private:
+
+	ID3D11Texture2D*			m_pTexture	= nullptr;
+	ID3D11RenderTargetView*		m_pRTV		= nullptr;
+	ID3D11DepthStencilView*		m_pDSV		= nullptr;
+	ID3D11ShaderResourceView*	m_pSRV		= nullptr;
+
+	friend class CDXGraphicsAPI;
 };

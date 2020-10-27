@@ -2,7 +2,7 @@
 
 CDXTexture::CDXTexture(){}
 
-void CDXTexture::clear()
+CDXTexture::~CDXTexture()
 {
     if (m_pTexture)
     {
@@ -12,12 +12,12 @@ void CDXTexture::clear()
     {
         m_pRTV->Release();
     }
-    if (m_pDepthTexture)
-    {
-        m_pDepthTexture->Release();
-    }
     if (m_pDSV)
     {
         m_pDSV->Release();
+    }
+    if (m_pSRV)
+    {
+        m_pSRV->Release();
     }
 }

@@ -6,8 +6,10 @@ class COGLInputLayout :
 {
 public:
     COGLInputLayout();
+    ~COGLInputLayout();
 
-    void clear()                      override;
-
+private:
     unsigned int VAO;
+
+    friend class COGLGraphicsAPI;
 };

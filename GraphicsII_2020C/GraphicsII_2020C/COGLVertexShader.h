@@ -8,7 +8,8 @@ public:
     COGLVertexShader();
     ~COGLVertexShader();
 
-    void clear()                override;
-
+private:
     unsigned int m_VertexShader;
+
+    friend class COGLGraphicsAPI;
 };
