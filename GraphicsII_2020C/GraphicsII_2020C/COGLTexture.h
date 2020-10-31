@@ -12,7 +12,7 @@ public:
 private:
 
     unsigned int m_iTexture;
-    unsigned int m_iRenderBuffer;
+    unsigned int m_iFramebuffer;
 
     friend class COGLGraphicsAPI;
 };

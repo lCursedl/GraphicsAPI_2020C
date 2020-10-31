@@ -37,6 +37,34 @@ const char* COGLGraphicsAPI::readShaderFile(std::wstring file)
 
 bool COGLGraphicsAPI::init(HWND window)
 {
+	PIXELFORMATDESCRIPTOR pfd =
+	{
+		sizeof(PIXELFORMATDESCRIPTOR),
+		1,
+		PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+		PFD_TYPE_RGBA,
+		32,
+		0, 0, 0, 0, 0, 0,
+		0,
+		0,
+		0,
+		0, 0, 0, 0,
+		24,
+		8,
+		0,
+		PFD_MAIN_PLANE,
+		0,
+		0, 0, 0
+	};
+
+	HDC wndHandle = GetDC(window);
+	int pixelFormat = ChoosePixelFormat(wndHandle, &pfd);
+
+	SetPixelFormat(wndHandle, pixelFormat, &pfd);
+
+	HGLRC oglRenderContext = wglCreateContext(wndHandle);
+	wglMakeCurrent(wndHandle, oglRenderContext);
+
 	if (!gladLoadGL())
 	{
 		return false;
@@ -47,26 +75,29 @@ bool COGLGraphicsAPI::init(HWND window)
 	return true;
 }
 
-CTexture* COGLGraphicsAPI::createTexture(int width, int height)
+CTexture* COGLGraphicsAPI::createTexture(int width,
+	int height,
+	TEXTURE_BINDINGS binding,
+	TEXTURE_FORMATS format)
 {
 	COGLTexture* Tex = new COGLTexture();
 	//Create texture
 	glBindTexture(GL_TEXTURE_2D, Tex->m_iTexture);
 	glTexImage2D(GL_TEXTURE_2D,
 		0,
-		GL_RGB,
+		GL_RGB,			//replace
 		width,
 		height,
 		0,
-		GL_RGB,
+		GL_RGB,			//replace
 		GL_UNSIGNED_BYTE,
 		NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	//Create RenderBufferObject for depth and stencil
-	glGenRenderbuffers(1, &Tex->m_iRenderBuffer);
+	/*glGenRenderbuffers(1, &Tex->m_iRenderBuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, Tex->m_iRenderBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);*/
 
 	return Tex;
 }
@@ -146,7 +177,7 @@ void COGLGraphicsAPI::setShaders(CShaderProgram* program)
 	glUseProgram(ShaderProgram->m_Program);
 }
 
-void COGLGraphicsAPI::draw(unsigned int indices)
+void COGLGraphicsAPI::drawIndexed(unsigned int indices)
 {
 	glDrawElements(GL_TRIANGLES, indices, GL_UNSIGNED_INT, 0);
 }
@@ -187,6 +218,8 @@ CBuffer* COGLGraphicsAPI::createBuffer(const void* data,
 
 	glBindBuffer(OGLBuffer->m_Type, OGLBuffer->m_Buffer);
 	glBufferData(OGLBuffer->m_Type, OGLBuffer->m_Size, data, GL_STATIC_DRAW);
+
+	return OGLBuffer;
 }
 
 CInputLayout* COGLGraphicsAPI::createInputLayout(CShaderProgram* program, LAYOUT_DESC desc)

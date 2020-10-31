@@ -3,6 +3,7 @@
 #include <d3d11.h>
 #include <d3dx11.h>
 #include <d3dcompiler.h>
+#include <map>
 
 class CDXGraphicsAPI :
     public CGraphicsAPI
@@ -12,7 +13,10 @@ public:
 
     //DEVICE
 
-    CTexture* createTexture(int width, int height)            override;
+    CTexture* createTexture(int width,
+        int height,
+        TEXTURE_BINDINGS binding,
+        TEXTURE_FORMATS format)                               override;
 
     CShaderProgram* createShaderProgram(std::wstring vsfile,
         std::wstring psfile)                                  override;
@@ -43,7 +47,7 @@ private:
     CTexture*               m_BackBuffer;
     CTexture*               m_DepthStencil;
 
-
+    std::map<TEXTURE_FORMATS, DXGI_FORMAT> m_Formats;
 
     HRESULT compileShaderFromFile(std::wstring fileName,
         std::string shaderModel,

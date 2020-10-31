@@ -1,7 +1,7 @@
 #pragma once
 #include "CGraphicsAPI.h"
 #include <glad/glad.h>
-#include <glad/glad_wgl.h>
+//#include <glad/glad_wgl.h>
 class COGLGraphicsAPI :
     public CGraphicsAPI
 {
@@ -12,10 +12,12 @@ private:
 public:
     bool init(HWND window);
 
-
     //DEVICE
 
-    CTexture* createTexture(int width, int height)            override;
+    CTexture* createTexture(int width,
+        int height,
+        TEXTURE_BINDINGS binding,
+        TEXTURE_FORMATS format)                               override;
     CShaderProgram* createShaderProgram(std::wstring vsfile,
         std::wstring psfile)                                  override;
     CBuffer* createBuffer(const void* data,
@@ -28,7 +30,7 @@ public:
     void setBackBuffer()                                      override;
     void setViewport(int width, int height)                   override;
     void setShaders(CShaderProgram* program)                  override;
-    void draw(unsigned int indices)                           override;
+    void drawIndexed(unsigned int indices)                    override;
     void clearBackBuffer(float red, float green, float blue)  override;
     void setInputLayout(CInputLayout* layout)                 override;
 };

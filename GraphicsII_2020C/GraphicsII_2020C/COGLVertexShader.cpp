@@ -8,8 +8,3 @@ COGLVertexShader::COGLVertexShader()
 COGLVertexShader::~COGLVertexShader()
 {
 }
-
-void COGLVertexShader::clear()
-{
-	glDeleteShader(m_VertexShader);
-}

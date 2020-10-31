@@ -2,7 +2,4 @@
 
 CTexture::CTexture(){}
 
-CTexture::~CTexture()
-{
-	clear();
-}
+CTexture::~CTexture(){}

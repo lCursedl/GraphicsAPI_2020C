@@ -32,7 +32,10 @@ public:
 
 	//DEVICE
 	
-	virtual CTexture* createTexture(int width, int height) = 0;
+	virtual CTexture* createTexture(int width,
+		int height,
+		TEXTURE_BINDINGS binding,
+		TEXTURE_FORMATS format) = 0;
 	virtual CShaderProgram* createShaderProgram(std::wstring vsfile,
 		std::wstring psfile) = 0;
 	virtual CBuffer* createBuffer(const void* data,
