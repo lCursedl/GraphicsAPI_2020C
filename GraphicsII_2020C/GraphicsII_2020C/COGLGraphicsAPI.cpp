@@ -72,6 +72,96 @@ bool COGLGraphicsAPI::init(HWND window)
 	RECT rc;
 	GetWindowRect(window, &rc);
 	setViewport(rc.right - rc.left, rc.bottom - rc.top);
+
+	m_Formats.insert(std::make_pair(R8_SNORM,
+					std::make_pair(GL_R8_SNORM, GL_RED)));
+	m_Formats.insert(std::make_pair(R16_SNORM,
+					std::make_pair(GL_R16_SNORM, GL_RED)));
+	m_Formats.insert(std::make_pair(RG8_SNORM,
+					std::make_pair(GL_RG8_SNORM, GL_RG)));
+	m_Formats.insert(std::make_pair(RG16_SNORM,
+					std::make_pair(GL_RG16_SNORM, GL_RG)));
+	m_Formats.insert(std::make_pair(RGB10_A2UI,
+					std::make_pair(GL_RGB10_A2UI, GL_RGBA)));
+	m_Formats.insert(std::make_pair(R16_FLOAT,
+					std::make_pair(GL_R16F, GL_RED)));
+	m_Formats.insert(std::make_pair(RG16_FLOAT,
+					std::make_pair(GL_RG16F, GL_RG)));
+	m_Formats.insert(std::make_pair(RGBA16_FLOAT,
+					std::make_pair(GL_RGBA16F, GL_RGBA)));
+	m_Formats.insert(std::make_pair(R32_FLOAT,
+					std::make_pair(GL_R32F, GL_RED)));
+	m_Formats.insert(std::make_pair(RG32_FLOAT,		
+					std::make_pair(GL_RG32F, GL_RG)));
+	m_Formats.insert(std::make_pair(RGB32_FLOAT,	
+					std::make_pair(GL_RGB32F, GL_RGB)));
+	m_Formats.insert(std::make_pair(RGBA32_FLOAT,	
+					std::make_pair(GL_RGBA32F, GL_RGBA)));
+	m_Formats.insert(std::make_pair(RG11B10_FLOAT,	
+					std::make_pair(GL_R11F_G11F_B10F, GL_RGB)));
+	m_Formats.insert(std::make_pair(RGB9_E5,		
+					std::make_pair(GL_RGB9_E5, GL_RGB)));
+	m_Formats.insert(std::make_pair(R8_INT,			
+					std::make_pair(GL_R8I, GL_RED_INTEGER)));
+	m_Formats.insert(std::make_pair(R8_UINT,		
+					std::make_pair(GL_R8UI, GL_RED_INTEGER)));
+	m_Formats.insert(std::make_pair(R16_INT,		
+					std::make_pair(GL_R16I, GL_RED_INTEGER)));
+	m_Formats.insert(std::make_pair(R16_UINT,		
+					std::make_pair(GL_R16UI, GL_RED_INTEGER)));
+	m_Formats.insert(std::make_pair(R32_INT,		
+					std::make_pair(GL_R32I, GL_RED_INTEGER)));
+	m_Formats.insert(std::make_pair(R32_UINT,		
+					std::make_pair(GL_R32UI, GL_RED_INTEGER)));
+	m_Formats.insert(std::make_pair(RG8_INT,		
+					std::make_pair(GL_RG8I, GL_RG_INTEGER)));
+	m_Formats.insert(std::make_pair(RG8_UINT,		
+					std::make_pair(GL_RG8UI, GL_RG_INTEGER)));
+	m_Formats.insert(std::make_pair(RG16_INT,		
+					std::make_pair(GL_RG16I, GL_RG_INTEGER)));
+	m_Formats.insert(std::make_pair(RG16_UINT,		
+					std::make_pair(GL_RG16UI, GL_RG_INTEGER)));
+	m_Formats.insert(std::make_pair(RG32_INT,		
+					std::make_pair(GL_RG32I, GL_RG_INTEGER)));
+	m_Formats.insert(std::make_pair(RG32_UINT,		
+					std::make_pair(GL_RG32UI, GL_RG_INTEGER)));
+	m_Formats.insert(std::make_pair(RGB32_INT,		
+					std::make_pair(GL_RGB32I, GL_RGB_INTEGER)));
+	m_Formats.insert(std::make_pair(RGB32_UINT,		
+					std::make_pair(GL_RGB32UI, GL_RGB_INTEGER)));
+	m_Formats.insert(std::make_pair(RGBA8_INT,		
+					std::make_pair(GL_RGBA8I, GL_RGBA_INTEGER)));
+	m_Formats.insert(std::make_pair(RGBA8_UINT,		
+					std::make_pair(GL_RGBA8UI, GL_RGBA_INTEGER)));
+	m_Formats.insert(std::make_pair(RGBA16_INT,		
+					std::make_pair(GL_RGBA16I, GL_RGBA_INTEGER)));
+	m_Formats.insert(std::make_pair(RGBA16_UINT,	
+					std::make_pair(GL_RGBA16UI, GL_RGBA_INTEGER)));
+	m_Formats.insert(std::make_pair(RGBA32_INT,		
+					std::make_pair(GL_RGBA32I, GL_RGBA_INTEGER)));
+	m_Formats.insert(std::make_pair(RGBA32_UINT,	
+					std::make_pair(GL_RGBA32UI, GL_RGBA_INTEGER)));
+	m_Formats.insert(std::make_pair(R8_UNORM,
+					std::make_pair(GL_R8, GL_RED)));
+	m_Formats.insert(std::make_pair(R16_UNORM,
+					std::make_pair(GL_R16, GL_RED)));
+	m_Formats.insert(std::make_pair(RG8_UNORM,
+					std::make_pair(GL_RG8, GL_RG)));
+	m_Formats.insert(std::make_pair(RG16_UNORM,
+					std::make_pair(GL_RG16, GL_RG)));
+	m_Formats.insert(std::make_pair(RGB5A1_UNORM,
+					std::make_pair(GL_RGB5_A1, GL_RGB)));
+	m_Formats.insert(std::make_pair(RGBA8_UNORM,
+					std::make_pair(GL_RGBA8, GL_RGBA)));
+	m_Formats.insert(std::make_pair(RGB10A2_UNORM,
+					std::make_pair(GL_RGB10_A2, GL_RGBA)));
+	m_Formats.insert(std::make_pair(RGBA16_UNORM,
+					std::make_pair(GL_RGBA16, GL_RGBA)));
+	m_Formats.insert(std::make_pair(RGBA8_SRGB_UNORM,
+					std::make_pair(GL_SRGB8_ALPHA8, GL_RGBA)));
+	m_Formats.insert(std::make_pair(D24_S8,
+					std::make_pair(GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL)));
+
 	return true;
 }
 
@@ -82,23 +172,29 @@ CTexture* COGLGraphicsAPI::createTexture(int width,
 {
 	COGLTexture* Tex = new COGLTexture();
 	//Create texture
-	glBindTexture(GL_TEXTURE_2D, Tex->m_iTexture);
-	glTexImage2D(GL_TEXTURE_2D,
-		0,
-		GL_RGB,			//replace
-		width,
-		height,
-		0,
-		GL_RGB,			//replace
-		GL_UNSIGNED_BYTE,
-		NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	//Create RenderBufferObject for depth and stencil
-	/*glGenRenderbuffers(1, &Tex->m_iRenderBuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, Tex->m_iRenderBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);*/
-
+	if (format != D24_S8)
+	{
+		glGenTextures(1, &Tex->m_iTexture);
+		glBindTexture(GL_TEXTURE_2D, Tex->m_iTexture);
+		glTexImage2D(GL_TEXTURE_2D,
+			0,
+			m_Formats[format].first,
+			width,
+			height,
+			0,
+			m_Formats[format].second,
+			GL_UNSIGNED_BYTE,
+			NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
+	else
+	{
+		//Create RenderBufferObject for depth and stencil
+		glGenRenderbuffers(1, &Tex->m_iTexture);
+		glBindRenderbuffer(GL_RENDERBUFFER, Tex->m_iTexture);
+		glRenderbufferStorage(GL_RENDERBUFFER, m_Formats[format].first, width, height);
+	}
 	return Tex;
 }
 
@@ -192,6 +288,41 @@ void COGLGraphicsAPI::clearBackBuffer(float red, float green, float blue)
 void COGLGraphicsAPI::setInputLayout(CInputLayout* layout)
 {
 	glBindVertexArray(dynamic_cast<COGLInputLayout*>(layout)->VAO);
+}
+
+void COGLGraphicsAPI::setRenderTarget(CTexture* texture, CTexture* depth)
+{
+	if (texture)
+	{
+		COGLTexture* tex = dynamic_cast<COGLTexture*>(texture);
+		if (tex->m_iFramebuffer != 0)
+		{
+			glBindFramebuffer(GL_FRAMEBUFFER, tex->m_iFramebuffer);
+			if (depth)
+			{
+				COGLTexture* d = dynamic_cast<COGLTexture*>(depth);
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER,
+					GL_DEPTH_STENCIL_ATTACHMENT,
+					GL_RENDERBUFFER,
+					d->m_iTexture);
+			}
+			else
+			{
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER,
+					GL_DEPTH_STENCIL_ATTACHMENT,
+					GL_RENDERBUFFER,
+					0);
+			}
+		}
+		else
+		{
+			OutputDebugStringA("Invalid RenderTargetView.");
+		}		
+	}
+	else
+	{
+		OutputDebugStringA("Received null pointer for texture.");
+	}
 }
 
 CBuffer* COGLGraphicsAPI::createBuffer(const void* data,

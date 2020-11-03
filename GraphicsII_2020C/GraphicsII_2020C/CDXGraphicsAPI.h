@@ -1,9 +1,7 @@
 #pragma once
 #include "CGraphicsAPI.h"
 #include <d3d11.h>
-#include <d3dx11.h>
 #include <d3dcompiler.h>
-#include <map>
 
 class CDXGraphicsAPI :
     public CGraphicsAPI
@@ -33,14 +31,12 @@ public:
     void setBackBuffer()                                      override;
     void setViewport(int width, int height)                   override;
     void setShaders(CShaderProgram* program)                  override;
-    void drawIndexed(unsigned int indices)                           override;
+    void drawIndexed(unsigned int indices)                    override;
     void clearBackBuffer(float red, float green, float blue)  override;
-    void setInputLayout(CInputLayout* layout)                 override;   
+    void setInputLayout(CInputLayout* layout)                 override;
+    void setRenderTarget(CTexture* texture, CTexture* depth)  override;
 
 private:
-    D3D_DRIVER_TYPE         m_DriverType;
-    D3D_FEATURE_LEVEL       m_FeatureLevel;
-
     ID3D11Device*           m_Device;
     ID3D11DeviceContext*    m_DeviceContext;
     IDXGISwapChain*         m_SwapChain;

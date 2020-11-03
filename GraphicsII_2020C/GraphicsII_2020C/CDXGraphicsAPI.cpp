@@ -7,8 +7,8 @@
 
 bool CDXGraphicsAPI::init(HWND window)
 {
-	m_DriverType = D3D_DRIVER_TYPE_NULL;
-	m_FeatureLevel = D3D_FEATURE_LEVEL_11_0;
+	D3D_DRIVER_TYPE m_DriverType = D3D_DRIVER_TYPE_NULL;
+	D3D_FEATURE_LEVEL m_FeatureLevel = D3D_FEATURE_LEVEL_11_0;
 	m_Device = NULL;
 	m_DeviceContext = NULL;
 	m_SwapChain = NULL;
@@ -17,10 +17,10 @@ bool CDXGraphicsAPI::init(HWND window)
 	RECT rc;
 	GetClientRect(window, &rc);
 
-	UINT width = rc.right - rc.left;
-	UINT height = rc.bottom - rc.top;
+	unsigned int width = rc.right - rc.left;
+	unsigned int height = rc.bottom - rc.top;
 
-	UINT createDeviceFlags = D3D11_CREATE_DEVICE_DEBUG;
+	unsigned int createDeviceFlags = D3D11_CREATE_DEVICE_DEBUG;
 
 	D3D_DRIVER_TYPE driverTypes[] =
 	{
@@ -28,7 +28,7 @@ bool CDXGraphicsAPI::init(HWND window)
 		D3D_DRIVER_TYPE_WARP,
 		D3D_DRIVER_TYPE_REFERENCE,
 	};
-	UINT numDriverTypes = ARRAYSIZE(driverTypes);
+	unsigned int numDriverTypes = ARRAYSIZE(driverTypes);
 
 	D3D_FEATURE_LEVEL featureLevels[] =
 	{
@@ -36,7 +36,7 @@ bool CDXGraphicsAPI::init(HWND window)
 		D3D_FEATURE_LEVEL_10_1,
 		D3D_FEATURE_LEVEL_10_0,
 	};
-	UINT numFeatureLevels = ARRAYSIZE(featureLevels);
+	unsigned int numFeatureLevels = ARRAYSIZE(featureLevels);
 
 	DXGI_SWAP_CHAIN_DESC sd;
 	ZeroMemory(&sd, sizeof(sd));
@@ -52,7 +52,9 @@ bool CDXGraphicsAPI::init(HWND window)
 	sd.SampleDesc.Quality = 0;
 	sd.Windowed = true;
 
-	for (UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++)
+	for (unsigned int driverTypeIndex = 0;
+		driverTypeIndex < numDriverTypes;
+		driverTypeIndex++)
 	{
 		m_DriverType = driverTypes[driverTypeIndex];
 		hr = D3D11CreateDeviceAndSwapChain(NULL,
@@ -178,6 +180,16 @@ bool CDXGraphicsAPI::init(HWND window)
 	m_Formats.insert(std::make_pair(RGBA16_UINT,	DXGI_FORMAT_R16G16B16A16_UINT));
 	m_Formats.insert(std::make_pair(RGBA32_INT,		DXGI_FORMAT_R32G32B32A32_SINT));
 	m_Formats.insert(std::make_pair(RGBA32_UINT,	DXGI_FORMAT_R32G32B32A32_UINT));
+	m_Formats.insert(std::make_pair(R8_UNORM,		DXGI_FORMAT_R8_UNORM));
+	m_Formats.insert(std::make_pair(R16_UNORM,		DXGI_FORMAT_R16_UNORM));
+	m_Formats.insert(std::make_pair(RG8_UNORM,		DXGI_FORMAT_R8G8_UNORM));
+	m_Formats.insert(std::make_pair(RG16_UNORM,		DXGI_FORMAT_R16G16_UNORM));
+	m_Formats.insert(std::make_pair(RGB5A1_UNORM,	DXGI_FORMAT_B5G5R5A1_UNORM));
+	m_Formats.insert(std::make_pair(RGBA8_UNORM,	DXGI_FORMAT_R8G8B8A8_UNORM));
+	m_Formats.insert(std::make_pair(RGB10A2_UNORM,	DXGI_FORMAT_R10G10B10A2_UNORM));
+	m_Formats.insert(std::make_pair(RGBA16_UNORM,	DXGI_FORMAT_R16G16B16A16_UNORM));
+	m_Formats.insert(std::make_pair(RGBA8_SRGB_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB));
+	m_Formats.insert(std::make_pair(D24_S8,			DXGI_FORMAT_D24_UNORM_S8_UINT));
 
 	return true;
 }
@@ -204,21 +216,17 @@ CTexture* CDXGraphicsAPI::createTexture(int width,
 		Desc.SampleDesc.Quality = 0;
 		Desc.Usage = D3D11_USAGE_DEFAULT;
 
-		if (binding == SHADER_RESOURCE)
+		if (binding & SHADER_RESOURCE)
 		{
-			Desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+			Desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
 		}
-		else if (binding == RENDER_TARGET)
+		if (binding & RENDER_TARGET)
 		{
-			Desc.BindFlags = D3D11_BIND_RENDER_TARGET;
+			Desc.BindFlags |= D3D11_BIND_RENDER_TARGET;
 		}
-		else if (binding == S_RESOURCE_R_TARGET)
+		if (binding & DEPTH_STENCIL)
 		{
-			Desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
-		}
-		else if (binding == DEPTH_STENCIL)
-		{
-			Desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+			Desc.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
 		}
 		Desc.MiscFlags = 0;
 
@@ -230,7 +238,7 @@ CTexture* CDXGraphicsAPI::createTexture(int width,
 			return nullptr;
 		}
 
-		if (binding == SHADER_RESOURCE)
+		if (binding & SHADER_RESOURCE)
 		{
 			D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
 			ZeroMemory(&viewDesc, sizeof(viewDesc));
@@ -248,7 +256,7 @@ CTexture* CDXGraphicsAPI::createTexture(int width,
 				return nullptr;
 			}
 		}
-		else if (binding == RENDER_TARGET)
+		if (binding & RENDER_TARGET)
 		{
 			D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
 			ZeroMemory(&rtvDesc, sizeof(rtvDesc));
@@ -265,40 +273,7 @@ CTexture* CDXGraphicsAPI::createTexture(int width,
 				return nullptr;
 			}
 		}
-		else if (binding == S_RESOURCE_R_TARGET)
-		{
-			D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
-			ZeroMemory(&viewDesc, sizeof(viewDesc));
-			viewDesc.Format = Desc.Format;
-			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-			viewDesc.Texture2D.MostDetailedMip = 0;
-			viewDesc.Texture2D.MipLevels = 1;
-
-			if (FAILED(m_Device->CreateShaderResourceView(
-				DXTexture->m_pTexture,
-				&viewDesc,
-				&DXTexture->m_pSRV)))
-			{
-				delete DXTexture;
-				return nullptr;
-			}
-
-			D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
-			ZeroMemory(&rtvDesc, sizeof(rtvDesc));
-			rtvDesc.Format = Desc.Format;
-			rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-			rtvDesc.Texture2D.MipSlice = 0;
-
-			if (FAILED(m_Device->CreateRenderTargetView(
-				DXTexture->m_pTexture,
-				&rtvDesc,
-				&DXTexture->m_pRTV)))
-			{
-				delete DXTexture;
-				return nullptr;
-			}
-		}
-		else if (binding == DEPTH_STENCIL)
+		if (binding & DEPTH_STENCIL)
 		{
 			D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
 			ZeroMemory(&descDSV, sizeof(descDSV));
@@ -316,6 +291,11 @@ CTexture* CDXGraphicsAPI::createTexture(int width,
 			}
 		}
 		return DXTexture;
+	}
+	else
+	{
+		OutputDebugStringA("Missing API initialization.");
+		return nullptr;
 	}
 }
 
@@ -541,8 +521,59 @@ void CDXGraphicsAPI::clearBackBuffer(float red, float green, float blue)
 
 void CDXGraphicsAPI::setInputLayout(CInputLayout* layout)
 {
-	m_DeviceContext->IASetInputLayout(
-		dynamic_cast<CDXInputLayout*>(layout)->m_InputLayout);
+	if (layout)
+	{
+		CDXInputLayout* dxlayout = dynamic_cast<CDXInputLayout*>(layout);
+		if (dxlayout->m_InputLayout)
+		{
+			m_DeviceContext->IASetInputLayout(dxlayout->m_InputLayout);
+		}
+		else
+		{
+			OutputDebugStringA("Input layout invalid.");
+		}
+		
+	}
+	else
+	{
+		OutputDebugStringA("Received null pointer.");
+	}
+}
+
+void CDXGraphicsAPI::setRenderTarget(CTexture* texture, CTexture* depth)
+{
+	if (texture)
+	{
+		ID3D11RenderTargetView* rtv = dynamic_cast<CDXTexture*>(texture)->m_pRTV;
+		if (rtv)
+		{
+			if (depth)
+			{
+				ID3D11DepthStencilView* dsv = dynamic_cast<CDXTexture*>(depth)->m_pDSV;
+				if (dsv)
+				{
+					m_DeviceContext->OMSetRenderTargets(1, &rtv, dsv);
+				}
+				else
+				{
+					OutputDebugStringA("Invalid DepthStencilView.");
+				}
+			}
+			else
+			{
+				m_DeviceContext->OMSetRenderTargets(1, &rtv, nullptr);
+			}
+			
+		}
+		else
+		{
+			OutputDebugStringA("Invalid RenderTargetView.");
+		}
+	}
+	else
+	{
+		OutputDebugStringA("Received null pointer for texture.");
+	}
 }
 
 HRESULT CDXGraphicsAPI::compileShaderFromFile(std::wstring fileName,
@@ -552,17 +583,15 @@ HRESULT CDXGraphicsAPI::compileShaderFromFile(std::wstring fileName,
 	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
 	ID3DBlob* pErrorBlob;
 	
-	HRESULT hr = D3DX11CompileFromFile(fileName.c_str(),
-		NULL,
-		NULL,
+	HRESULT hr = D3DCompileFromFile(fileName.c_str(),
+		nullptr,
+		nullptr,
 		"main",
 		shaderModel.c_str(),
 		dwShaderFlags,
 		0,
-		NULL,
 		ppBlobOut,
-		&pErrorBlob,
-		NULL);
+		&pErrorBlob);
 
 	if (FAILED(hr))
 	{

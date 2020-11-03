@@ -8,6 +8,7 @@ class COGLGraphicsAPI :
 private:
 
     const char* readShaderFile(std::wstring file);
+    std::map<TEXTURE_FORMATS, std::pair<int, int>>m_Formats;
 
 public:
     bool init(HWND window);
@@ -33,4 +34,5 @@ public:
     void drawIndexed(unsigned int indices)                    override;
     void clearBackBuffer(float red, float green, float blue)  override;
     void setInputLayout(CInputLayout* layout)                 override;
+    void setRenderTarget(CTexture* texture, CTexture* depth)  override;
 };

@@ -8,6 +8,7 @@
 #include "CInputLayout.h"
 
 #include <string>
+#include <map>
 
 struct Color
 {
@@ -52,4 +53,5 @@ public:
 	virtual void setShaders(CShaderProgram* program) = 0;
 	virtual void setInputLayout(CInputLayout* layout) = 0;
 	virtual void clearBackBuffer(float red, float green, float blue) = 0;
+	virtual void setRenderTarget(CTexture* texture, CTexture* depth) = 0;
 };
