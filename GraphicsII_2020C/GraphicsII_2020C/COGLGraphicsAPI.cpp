@@ -172,7 +172,12 @@ CTexture* COGLGraphicsAPI::createTexture(int width,
 {
 	COGLTexture* Tex = new COGLTexture();
 	//Create texture
-	if (format != D24_S8)
+	if (binding & RENDER_TARGET)
+	{
+		glGenFramebuffers(1, &Tex->m_iFramebuffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, Tex->m_iFramebuffer);
+	}
+	if (binding & SHADER_RESOURCE)
 	{
 		glGenTextures(1, &Tex->m_iTexture);
 		glBindTexture(GL_TEXTURE_2D, Tex->m_iTexture);
@@ -187,8 +192,16 @@ CTexture* COGLGraphicsAPI::createTexture(int width,
 			NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	}
-	else
+		if (Tex->m_iFramebuffer != 0)
+		{
+			glFramebufferTexture2D(GL_FRAMEBUFFER,
+				GL_COLOR_ATTACHMENT0,
+				GL_TEXTURE_2D,
+				Tex->m_iTexture,
+				0);
+		}
+	}	
+	if (binding & DEPTH_STENCIL)
 	{
 		//Create RenderBufferObject for depth and stencil
 		glGenRenderbuffers(1, &Tex->m_iTexture);
@@ -325,32 +338,73 @@ void COGLGraphicsAPI::setRenderTarget(CTexture* texture, CTexture* depth)
 	}
 }
 
+void COGLGraphicsAPI::updateBuffer(CBuffer* buffer, const void* data)
+{
+	if (!buffer)
+	{
+		OutputDebugStringA("Invalid buffer received.");
+		return;
+	}
+	if (!data)
+	{
+		OutputDebugStringA("Invalid data received.");
+		return;
+	}
+
+	COGLBuffer* buff = dynamic_cast<COGLBuffer*>(buffer);
+	if (buff->m_Buffer == 0)
+	{
+		OutputDebugStringA("Buffer not initalized, can't update data.");
+		return;
+	}
+	glBindBuffer(buff->m_Type, buff->m_Buffer);
+	glBufferSubData(buff->m_Type, 0, buff->m_Size, data);
+	glBindBuffer(buff->m_Type, 0);
+}
+
 CBuffer* COGLGraphicsAPI::createBuffer(const void* data,
 	unsigned int size,
 	BUFFER_TYPE type)
 {
-	COGLBuffer* OGLBuffer = new COGLBuffer();
-
-	glGenBuffers(1, &OGLBuffer->m_Buffer);
-	OGLBuffer->m_Size = size;
-
-	switch (type)
+	if (size != 0)
 	{
-	case VERTEX_BUFFER:
-		OGLBuffer->m_Type = GL_ARRAY_BUFFER;
-		break;
-	case INDEX_BUFFER:
-		OGLBuffer->m_Type = GL_ELEMENT_ARRAY_BUFFER;
-		break;
-	case CONST_BUFFER:
-		OGLBuffer->m_Type = GL_UNIFORM_BLOCK;
-		break;
+		COGLBuffer* OGLBuffer = new COGLBuffer();
+
+		glGenBuffers(1, &OGLBuffer->m_Buffer);
+		OGLBuffer->m_Size = size;
+
+		switch (type)
+		{
+		case VERTEX_BUFFER:
+			OGLBuffer->m_Type = GL_ARRAY_BUFFER;
+			break;
+		case INDEX_BUFFER:
+			OGLBuffer->m_Type = GL_ELEMENT_ARRAY_BUFFER;
+			break;
+		case CONST_BUFFER:
+			OGLBuffer->m_Type = GL_UNIFORM_BUFFER;
+			break;
+		}
+
+		glBindBuffer(OGLBuffer->m_Type, OGLBuffer->m_Buffer);
+
+		if (data != nullptr)
+		{			
+			glBufferData(OGLBuffer->m_Type, OGLBuffer->m_Size, data, GL_STATIC_DRAW);
+		}	
+		else
+		{
+			glBufferData(OGLBuffer->m_Type, OGLBuffer->m_Size, nullptr, GL_STATIC_DRAW);
+		}
+
+		glBindBuffer(OGLBuffer->m_Type, 0);
+		return OGLBuffer;
 	}
-
-	glBindBuffer(OGLBuffer->m_Type, OGLBuffer->m_Buffer);
-	glBufferData(OGLBuffer->m_Type, OGLBuffer->m_Size, data, GL_STATIC_DRAW);
-
-	return OGLBuffer;
+	else
+	{
+		OutputDebugStringA("Invalid size for buffer");
+		return nullptr;
+	}	
 }
 
 CInputLayout* COGLGraphicsAPI::createInputLayout(CShaderProgram* program, LAYOUT_DESC desc)

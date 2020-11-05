@@ -353,37 +353,48 @@ CBuffer* CDXGraphicsAPI::createBuffer(const void* data,
 	unsigned int size,
 	BUFFER_TYPE type)
 {
-	CDXBuffer* DXBuffer = new CDXBuffer();
-
-	DXBuffer->m_Desc.Usage = D3D11_USAGE_DEFAULT;
-	DXBuffer->m_Desc.ByteWidth = size;
-	DXBuffer->m_Desc.CPUAccessFlags = 0;
-
-	switch (type)
+	if (size != 0)
 	{
-	case VERTEX_BUFFER:
-		DXBuffer->m_Desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		break;
-	case INDEX_BUFFER:
-		DXBuffer->m_Desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-		break;
-	case CONST_BUFFER:
-		DXBuffer->m_Desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		break;
+		D3D11_BUFFER_DESC buffDesc;
+		ZeroMemory(&buffDesc, sizeof(buffDesc));
+
+		buffDesc.Usage = D3D11_USAGE_DEFAULT;
+		buffDesc.ByteWidth = size;
+		buffDesc.CPUAccessFlags = 0;
+		buffDesc.BindFlags = (D3D11_BIND_FLAG)type;
+
+		CDXBuffer* DXBuffer = new CDXBuffer();
+
+		if (data != nullptr)
+		{
+			D3D11_SUBRESOURCE_DATA InitData;
+			ZeroMemory(&InitData, sizeof(InitData));
+			InitData.pSysMem = data;
+			if (FAILED(m_Device->CreateBuffer(
+				&buffDesc,
+				&InitData,
+				&DXBuffer->m_Buffer)))
+			{
+				return nullptr;
+			}
+		}
+		else
+		{
+			if (FAILED(m_Device->CreateBuffer(
+				&buffDesc,
+				nullptr,
+				&DXBuffer->m_Buffer)))
+			{
+				return nullptr;
+			}
+		}
+		return DXBuffer;
 	}
-
-	D3D11_SUBRESOURCE_DATA InitData;
-	ZeroMemory(&InitData, sizeof(InitData));
-	InitData.pSysMem = data;
-	HRESULT hr = m_Device->CreateBuffer(
-		&DXBuffer->m_Desc,
-		&InitData,
-		&DXBuffer->m_Buffer);
-	if (FAILED(hr))
+	else
 	{
+		OutputDebugStringA("Invalid size for buffer");
 		return nullptr;
 	}
-	return DXBuffer;
 }
 
 CInputLayout* CDXGraphicsAPI::createInputLayout(CShaderProgram* program,
@@ -574,6 +585,28 @@ void CDXGraphicsAPI::setRenderTarget(CTexture* texture, CTexture* depth)
 	{
 		OutputDebugStringA("Received null pointer for texture.");
 	}
+}
+
+void CDXGraphicsAPI::updateBuffer(CBuffer* buffer, const void* data)
+{
+	if (!buffer)
+	{
+		OutputDebugStringA("Invalid buffer received.");
+		return;
+	}
+	if (!data)
+	{
+		OutputDebugStringA("Invalid data received.");
+		return;
+	}
+
+	CDXBuffer* buff = dynamic_cast<CDXBuffer*>(buffer);
+	if (!buff->m_Buffer)
+	{
+		OutputDebugStringA("Buffer not initialized, can't update data.");
+		return;
+	}
+	m_DeviceContext->UpdateSubresource(buff->m_Buffer, 0, NULL, data, 0, 0);
 }
 
 HRESULT CDXGraphicsAPI::compileShaderFromFile(std::wstring fileName,

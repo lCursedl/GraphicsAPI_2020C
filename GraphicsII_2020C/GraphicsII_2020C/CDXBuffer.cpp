@@ -2,8 +2,7 @@
 
 CDXBuffer::CDXBuffer()
 {
-	m_Buffer = NULL;
-	ZeroMemory(&m_Desc, sizeof(m_Desc));
+	m_Buffer = nullptr;
 }
 
 CDXBuffer::~CDXBuffer()

@@ -35,6 +35,7 @@ public:
     void clearBackBuffer(float red, float green, float blue)  override;
     void setInputLayout(CInputLayout* layout)                 override;
     void setRenderTarget(CTexture* texture, CTexture* depth)  override;
+    void updateBuffer(CBuffer* buffer, const void* data)      override;
 
 private:
     ID3D11Device*           m_Device;

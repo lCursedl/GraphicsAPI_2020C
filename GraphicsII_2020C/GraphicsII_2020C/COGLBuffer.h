@@ -12,7 +12,7 @@ public:
 
 private:
 
-    GLenum m_Type;
+    unsigned int m_Type;
     unsigned int m_Size;
     unsigned int m_Buffer;
 

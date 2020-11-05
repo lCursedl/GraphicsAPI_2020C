@@ -54,4 +54,5 @@ public:
 	virtual void setInputLayout(CInputLayout* layout) = 0;
 	virtual void clearBackBuffer(float red, float green, float blue) = 0;
 	virtual void setRenderTarget(CTexture* texture, CTexture* depth) = 0;
+	virtual void updateBuffer(CBuffer* buffer, const void * data) = 0;
 };
