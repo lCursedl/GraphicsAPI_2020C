@@ -1,7 +1,33 @@
 #include "CDXGraphicsAPI.h"
 #include "COGLGraphicsAPI.h"
+#include <glm/vec2.hpp>
+#include "glm/vec3.hpp"
+#include "glm/vec4.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+
+struct Vertex
+{
+	glm::vec3 Position;
+	glm::vec2 Texcoord;
+};
+
+struct Matrices
+{
+	glm::mat4 World;
+	glm::mat4 View;
+	glm::mat4 Projection;
+	glm::vec4 Color;
+};
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+void Load(CGraphicsAPI* api);
+void Render(CGraphicsAPI* api);
+void Clear();
+
+CBuffer* vb = nullptr;
+CBuffer* ib = nullptr;
+CBuffer* cbMatrices = nullptr;
+CShaderProgram* sp = nullptr;
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow)
 {
@@ -37,8 +63,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 
 	ShowWindow(hwnd, nCmdShow);
 
-	CGraphicsAPI* api = new CDXGraphicsAPI();
-	api->init(hwnd);
+	CGraphicsAPI* graphicsAPI = new CDXGraphicsAPI();
+	graphicsAPI->init(hwnd);
+	Load(graphicsAPI);
 
 	MSG msg = {};
 	while (WM_QUIT != msg.message)
@@ -48,7 +75,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
+		else
+		{
+			Render(graphicsAPI);
+		}
 	}
+	Clear();
+	graphicsAPI->shutdown();
 	return 0;
 }
 
@@ -63,14 +96,118 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		hdc = BeginPaint(hWnd, &ps);
 		EndPaint(hWnd, &ps);
 		break;
-
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
-
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
-
 	return 0;
+}
+
+void Clear()
+{
+	delete vb;
+	delete ib;
+	delete cbMatrices;
+	delete sp;
+}
+
+void Load(CGraphicsAPI* api)
+{
+	int error;
+	//Compile and create vertex / pixel shader
+	sp = api->createShaderProgram(L"DX_VS.fx", L"DX_PS.fx");
+	//Define input layout
+	LAYOUT_DESC lDesc;
+	lDesc.addToDesc(POSITION, RGB32_FLOAT, 0, 3);
+	lDesc.addToDesc(TEXCOORD, RG32_FLOAT, 12, 2);
+	//Create input layout
+	CInputLayout* layout = api->createInputLayout(sp, lDesc);
+	//Define vertex buffer
+	std::vector<Vertex>vertices;
+	vertices.push_back({ glm::vec3(-1.0f, 1.0f, -1.0f),	glm::vec2(0.0f, 0.0f) });
+	vertices.push_back({ glm::vec3(1.0f, 1.0f, -1.0f),	glm::vec2(1.0f, 0.0f) });
+	vertices.push_back({ glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(1.0f, 1.0f) });
+	vertices.push_back({ glm::vec3(-1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 1.0f) });
+
+	vertices.push_back({ glm::vec3(-1.0f, -1.0f, -1.0f),glm::vec2(0.0f, 0.0f) });
+	vertices.push_back({ glm::vec3(1.0f, -1.0f, -1.0f),	glm::vec2(1.0f, 0.0f) });
+	vertices.push_back({ glm::vec3(1.0f, -1.0f, 1.0f),	glm::vec2(1.0f, 1.0f) });
+	vertices.push_back({ glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 1.0f) });
+
+	vertices.push_back({ glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 0.0f) });
+	vertices.push_back({ glm::vec3(-1.0f, -1.0f, -1.0f),glm::vec2(1.0f, 0.0f) });
+	vertices.push_back({ glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec2(1.0f, 1.0f) });
+	vertices.push_back({ glm::vec3(-1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 1.0f) });
+
+	vertices.push_back({ glm::vec3(1.0f, -1.0f, 1.0f),	glm::vec2(0.0f, 0.0f) });
+	vertices.push_back({ glm::vec3(1.0f, -1.0f, -1.0f), glm::vec2(1.0f, 0.0f) });
+	vertices.push_back({ glm::vec3(1.0f, 1.0f, -1.0f),	glm::vec2(1.0f, 1.0f) });
+	vertices.push_back({ glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 1.0f) });
+
+	vertices.push_back({ glm::vec3(-1.0f, -1.0f, -1.0f),glm::vec2(0.0f, 0.0f) });
+	vertices.push_back({ glm::vec3(1.0f, -1.0f, -1.0f), glm::vec2(1.0f, 0.0f) });
+	vertices.push_back({ glm::vec3(1.0f, 1.0f, -1.0f),	glm::vec2(1.0f, 1.0f) });
+	vertices.push_back({ glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec2(0.0f, 1.0f) });
+
+	vertices.push_back({ glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 0.0f) });
+	vertices.push_back({ glm::vec3(1.0f, -1.0f, 1.0f),	glm::vec2(1.0f, 0.0f) });
+	vertices.push_back({ glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(1.0f, 1.0f) });
+	vertices.push_back({ glm::vec3(-1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 1.0f) });
+	//Define index buffer
+	std::vector<unsigned int>indices;
+	indices.push_back(3); indices.push_back(1); indices.push_back(0);
+	indices.push_back(2); indices.push_back(1); indices.push_back(3);
+
+	indices.push_back(6); indices.push_back(4); indices.push_back(5);
+	indices.push_back(7); indices.push_back(4); indices.push_back(6);
+
+	indices.push_back(11); indices.push_back(9); indices.push_back(8);
+	indices.push_back(10); indices.push_back(9); indices.push_back(11);
+
+	indices.push_back(14); indices.push_back(12); indices.push_back(13);
+	indices.push_back(15); indices.push_back(12); indices.push_back(14);
+
+	indices.push_back(19); indices.push_back(17); indices.push_back(16);
+	indices.push_back(18); indices.push_back(17); indices.push_back(19);
+
+	indices.push_back(22); indices.push_back(20); indices.push_back(21);
+	indices.push_back(23); indices.push_back(20); indices.push_back(22);
+	//Create vertex buffer
+	vb = api->createBuffer(vertices.data(), sizeof(Vertex) * 24, VERTEX_BUFFER);
+	//Create index buffer
+	ib = api->createBuffer(indices.data(), sizeof(unsigned int) * 36, INDEX_BUFFER);
+	//Create constant buffer
+	cbMatrices = api->createBuffer(nullptr, sizeof(Matrices), CONST_BUFFER);
+	//Create structure to update CB
+	Matrices mat;
+	//Assign world matrix as identity
+	mat.World = glm::mat4(1.0f);
+	//Set view position, look at & up
+	glm::vec3 Eye(0.0f, 3.0f, -6.0f);
+	glm::vec3 LAt(0.0f, 1.0f, 0.0f);
+	glm::vec3 Up(0.0f, 1.0f, 0.0f);
+	//Generate View matrix
+	mat.View = glm::transpose(glm::lookAtLH(Eye, LAt, Up));
+	//Generate Projection matrix
+	mat.Projection = glm::transpose(
+		glm::perspectiveFovLH(0.785398f, 800.f, 600.f, 0.01f, 100.f));
+	mat.Color = {1.0f, 0.0f, 0.0f, 1.0f};
+	
+	api->updateBuffer(cbMatrices, &mat);
+	api->setInputLayout(layout);
+	api->setVertexBuffer(vb, sizeof(Vertex));
+	api->setIndexBuffer(ib);
+}
+
+void Render(CGraphicsAPI* api)
+{
+	api->clearBackBuffer(0.0f, 0.125f, 0.3f);
+
+	api->setShaders(sp);
+	api->setConstantBuffer(0, cbMatrices, VERTEX_SHADER);
+	api->setConstantBuffer(0, cbMatrices, PIXEL_SHADER);
+	api->drawIndexed(36);
+	api->swapBuffer();
 }

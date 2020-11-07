@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "Formats.h"
 
 enum SEMANTIC
 {
@@ -21,22 +22,24 @@ enum FORMAT
 
 struct LAYOUT
 {
-	LAYOUT(SEMANTIC s, FORMAT f, int offset)
+	LAYOUT(SEMANTIC s, FORMATS f, int offset, int elements)
 	{
 		s_Semantic = s;
 		s_Format = f;
 		s_Offset = offset;
+		s_NumElements = elements;
 	}
 	SEMANTIC s_Semantic;
-	FORMAT s_Format;
+	FORMATS s_Format;
 	int s_Offset;
+	int s_NumElements;
 };
 
 struct LAYOUT_DESC
 {
-	void addToDesc(SEMANTIC semantic, FORMAT format, int offset)
+	void addToDesc(SEMANTIC semantic, FORMATS format, int offset, int elements)
 	{
-		LAYOUT L(semantic, format, offset);
+		LAYOUT L(semantic, format, offset, elements);
 		v_Layout.push_back(L);
 	}
 

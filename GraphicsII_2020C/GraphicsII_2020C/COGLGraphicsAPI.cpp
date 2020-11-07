@@ -1,20 +1,19 @@
 #include "COGLGraphicsAPI.h"
 #include "COGLRTV.h"
 #include "COGLTexture.h"
-#include "COGLVertexShader.h"
-#include "COGLPixelShader.h"
 #include "COGLBuffer.h"
 #include "COGLShaderProgram.h"
 #include "COGLInputLayout.h"
+#include "COGLSamplerState.h"
+#include "COGLVertexShader.h"
+#include "COGLPixelShader.h"
 #include <string>
 #include <fstream>
 #include <sstream>
 
-const char* COGLGraphicsAPI::readShaderFile(std::wstring file)
+void COGLGraphicsAPI::readShaderFile(std::wstring file, std::string &source)
 {
-	std::string code;
 	std::ifstream shaderFile;
-	const char* shaderCode;
 
 	shaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
@@ -24,15 +23,104 @@ const char* COGLGraphicsAPI::readShaderFile(std::wstring file)
 		std::stringstream shaderStream;
 		shaderStream << shaderFile.rdbuf();
 		shaderFile.close();
-		code = shaderStream.str();
-		shaderCode = code.c_str();
+		source = shaderStream.str();
 	}
 	catch (std::ifstream::failure e)
 	{
-		return nullptr;
+		return;
 	}
-	
-	return shaderCode;
+}
+
+void COGLGraphicsAPI::fillFormats()
+{
+	m_Formats.insert(std::make_pair(R8_SNORM,
+		std::make_pair(GL_R8_SNORM, GL_RED)));
+	m_Formats.insert(std::make_pair(R16_SNORM,
+		std::make_pair(GL_R16_SNORM, GL_RED)));
+	m_Formats.insert(std::make_pair(RG8_SNORM,
+		std::make_pair(GL_RG8_SNORM, GL_RG)));
+	m_Formats.insert(std::make_pair(RG16_SNORM,
+		std::make_pair(GL_RG16_SNORM, GL_RG)));
+	m_Formats.insert(std::make_pair(RGB10_A2UI,
+		std::make_pair(GL_RGB10_A2UI, GL_RGBA)));
+	m_Formats.insert(std::make_pair(R16_FLOAT,
+		std::make_pair(GL_R16F, GL_RED)));
+	m_Formats.insert(std::make_pair(RG16_FLOAT,
+		std::make_pair(GL_RG16F, GL_RG)));
+	m_Formats.insert(std::make_pair(RGBA16_FLOAT,
+		std::make_pair(GL_RGBA16F, GL_RGBA)));
+	m_Formats.insert(std::make_pair(R32_FLOAT,
+		std::make_pair(GL_R32F, GL_RED)));
+	m_Formats.insert(std::make_pair(RG32_FLOAT,
+		std::make_pair(GL_RG32F, GL_RG)));
+	m_Formats.insert(std::make_pair(RGB32_FLOAT,
+		std::make_pair(GL_RGB32F, GL_RGB)));
+	m_Formats.insert(std::make_pair(RGBA32_FLOAT,
+		std::make_pair(GL_RGBA32F, GL_RGBA)));
+	m_Formats.insert(std::make_pair(RG11B10_FLOAT,
+		std::make_pair(GL_R11F_G11F_B10F, GL_RGB)));
+	m_Formats.insert(std::make_pair(RGB9_E5,
+		std::make_pair(GL_RGB9_E5, GL_RGB)));
+	m_Formats.insert(std::make_pair(R8_INT,
+		std::make_pair(GL_R8I, GL_RED_INTEGER)));
+	m_Formats.insert(std::make_pair(R8_UINT,
+		std::make_pair(GL_R8UI, GL_RED_INTEGER)));
+	m_Formats.insert(std::make_pair(R16_INT,
+		std::make_pair(GL_R16I, GL_RED_INTEGER)));
+	m_Formats.insert(std::make_pair(R16_UINT,
+		std::make_pair(GL_R16UI, GL_RED_INTEGER)));
+	m_Formats.insert(std::make_pair(R32_INT,
+		std::make_pair(GL_R32I, GL_RED_INTEGER)));
+	m_Formats.insert(std::make_pair(R32_UINT,
+		std::make_pair(GL_R32UI, GL_RED_INTEGER)));
+	m_Formats.insert(std::make_pair(RG8_INT,
+		std::make_pair(GL_RG8I, GL_RG_INTEGER)));
+	m_Formats.insert(std::make_pair(RG8_UINT,
+		std::make_pair(GL_RG8UI, GL_RG_INTEGER)));
+	m_Formats.insert(std::make_pair(RG16_INT,
+		std::make_pair(GL_RG16I, GL_RG_INTEGER)));
+	m_Formats.insert(std::make_pair(RG16_UINT,
+		std::make_pair(GL_RG16UI, GL_RG_INTEGER)));
+	m_Formats.insert(std::make_pair(RG32_INT,
+		std::make_pair(GL_RG32I, GL_RG_INTEGER)));
+	m_Formats.insert(std::make_pair(RG32_UINT,
+		std::make_pair(GL_RG32UI, GL_RG_INTEGER)));
+	m_Formats.insert(std::make_pair(RGB32_INT,
+		std::make_pair(GL_RGB32I, GL_RGB_INTEGER)));
+	m_Formats.insert(std::make_pair(RGB32_UINT,
+		std::make_pair(GL_RGB32UI, GL_RGB_INTEGER)));
+	m_Formats.insert(std::make_pair(RGBA8_INT,
+		std::make_pair(GL_RGBA8I, GL_RGBA_INTEGER)));
+	m_Formats.insert(std::make_pair(RGBA8_UINT,
+		std::make_pair(GL_RGBA8UI, GL_RGBA_INTEGER)));
+	m_Formats.insert(std::make_pair(RGBA16_INT,
+		std::make_pair(GL_RGBA16I, GL_RGBA_INTEGER)));
+	m_Formats.insert(std::make_pair(RGBA16_UINT,
+		std::make_pair(GL_RGBA16UI, GL_RGBA_INTEGER)));
+	m_Formats.insert(std::make_pair(RGBA32_INT,
+		std::make_pair(GL_RGBA32I, GL_RGBA_INTEGER)));
+	m_Formats.insert(std::make_pair(RGBA32_UINT,
+		std::make_pair(GL_RGBA32UI, GL_RGBA_INTEGER)));
+	m_Formats.insert(std::make_pair(R8_UNORM,
+		std::make_pair(GL_R8, GL_RED)));
+	m_Formats.insert(std::make_pair(R16_UNORM,
+		std::make_pair(GL_R16, GL_RED)));
+	m_Formats.insert(std::make_pair(RG8_UNORM,
+		std::make_pair(GL_RG8, GL_RG)));
+	m_Formats.insert(std::make_pair(RG16_UNORM,
+		std::make_pair(GL_RG16, GL_RG)));
+	m_Formats.insert(std::make_pair(RGB5A1_UNORM,
+		std::make_pair(GL_RGB5_A1, GL_RGB)));
+	m_Formats.insert(std::make_pair(RGBA8_UNORM,
+		std::make_pair(GL_RGBA8, GL_RGBA)));
+	m_Formats.insert(std::make_pair(RGB10A2_UNORM,
+		std::make_pair(GL_RGB10_A2, GL_RGBA)));
+	m_Formats.insert(std::make_pair(RGBA16_UNORM,
+		std::make_pair(GL_RGBA16, GL_RGBA)));
+	m_Formats.insert(std::make_pair(RGBA8_SRGB_UNORM,
+		std::make_pair(GL_SRGB8_ALPHA8, GL_RGBA)));
+	m_Formats.insert(std::make_pair(D24_S8,
+		std::make_pair(GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL)));
 }
 
 bool COGLGraphicsAPI::init(HWND window)
@@ -57,13 +145,13 @@ bool COGLGraphicsAPI::init(HWND window)
 		0, 0, 0
 	};
 
-	HDC wndHandle = GetDC(window);
-	int pixelFormat = ChoosePixelFormat(wndHandle, &pfd);
+	m_Handle = GetDC(window);
+	int pixelFormat = ChoosePixelFormat(m_Handle, &pfd);
 
-	SetPixelFormat(wndHandle, pixelFormat, &pfd);
+	SetPixelFormat(m_Handle, pixelFormat, &pfd);
 
-	HGLRC oglRenderContext = wglCreateContext(wndHandle);
-	wglMakeCurrent(wndHandle, oglRenderContext);
+	oglRenderContext = wglCreateContext(m_Handle);
+	wglMakeCurrent(m_Handle, oglRenderContext);
 
 	if (!gladLoadGL())
 	{
@@ -72,103 +160,23 @@ bool COGLGraphicsAPI::init(HWND window)
 	RECT rc;
 	GetWindowRect(window, &rc);
 	setViewport(rc.right - rc.left, rc.bottom - rc.top);
+	glEnable(GL_DEPTH_TEST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	m_Formats.insert(std::make_pair(R8_SNORM,
-					std::make_pair(GL_R8_SNORM, GL_RED)));
-	m_Formats.insert(std::make_pair(R16_SNORM,
-					std::make_pair(GL_R16_SNORM, GL_RED)));
-	m_Formats.insert(std::make_pair(RG8_SNORM,
-					std::make_pair(GL_RG8_SNORM, GL_RG)));
-	m_Formats.insert(std::make_pair(RG16_SNORM,
-					std::make_pair(GL_RG16_SNORM, GL_RG)));
-	m_Formats.insert(std::make_pair(RGB10_A2UI,
-					std::make_pair(GL_RGB10_A2UI, GL_RGBA)));
-	m_Formats.insert(std::make_pair(R16_FLOAT,
-					std::make_pair(GL_R16F, GL_RED)));
-	m_Formats.insert(std::make_pair(RG16_FLOAT,
-					std::make_pair(GL_RG16F, GL_RG)));
-	m_Formats.insert(std::make_pair(RGBA16_FLOAT,
-					std::make_pair(GL_RGBA16F, GL_RGBA)));
-	m_Formats.insert(std::make_pair(R32_FLOAT,
-					std::make_pair(GL_R32F, GL_RED)));
-	m_Formats.insert(std::make_pair(RG32_FLOAT,		
-					std::make_pair(GL_RG32F, GL_RG)));
-	m_Formats.insert(std::make_pair(RGB32_FLOAT,	
-					std::make_pair(GL_RGB32F, GL_RGB)));
-	m_Formats.insert(std::make_pair(RGBA32_FLOAT,	
-					std::make_pair(GL_RGBA32F, GL_RGBA)));
-	m_Formats.insert(std::make_pair(RG11B10_FLOAT,	
-					std::make_pair(GL_R11F_G11F_B10F, GL_RGB)));
-	m_Formats.insert(std::make_pair(RGB9_E5,		
-					std::make_pair(GL_RGB9_E5, GL_RGB)));
-	m_Formats.insert(std::make_pair(R8_INT,			
-					std::make_pair(GL_R8I, GL_RED_INTEGER)));
-	m_Formats.insert(std::make_pair(R8_UINT,		
-					std::make_pair(GL_R8UI, GL_RED_INTEGER)));
-	m_Formats.insert(std::make_pair(R16_INT,		
-					std::make_pair(GL_R16I, GL_RED_INTEGER)));
-	m_Formats.insert(std::make_pair(R16_UINT,		
-					std::make_pair(GL_R16UI, GL_RED_INTEGER)));
-	m_Formats.insert(std::make_pair(R32_INT,		
-					std::make_pair(GL_R32I, GL_RED_INTEGER)));
-	m_Formats.insert(std::make_pair(R32_UINT,		
-					std::make_pair(GL_R32UI, GL_RED_INTEGER)));
-	m_Formats.insert(std::make_pair(RG8_INT,		
-					std::make_pair(GL_RG8I, GL_RG_INTEGER)));
-	m_Formats.insert(std::make_pair(RG8_UINT,		
-					std::make_pair(GL_RG8UI, GL_RG_INTEGER)));
-	m_Formats.insert(std::make_pair(RG16_INT,		
-					std::make_pair(GL_RG16I, GL_RG_INTEGER)));
-	m_Formats.insert(std::make_pair(RG16_UINT,		
-					std::make_pair(GL_RG16UI, GL_RG_INTEGER)));
-	m_Formats.insert(std::make_pair(RG32_INT,		
-					std::make_pair(GL_RG32I, GL_RG_INTEGER)));
-	m_Formats.insert(std::make_pair(RG32_UINT,		
-					std::make_pair(GL_RG32UI, GL_RG_INTEGER)));
-	m_Formats.insert(std::make_pair(RGB32_INT,		
-					std::make_pair(GL_RGB32I, GL_RGB_INTEGER)));
-	m_Formats.insert(std::make_pair(RGB32_UINT,		
-					std::make_pair(GL_RGB32UI, GL_RGB_INTEGER)));
-	m_Formats.insert(std::make_pair(RGBA8_INT,		
-					std::make_pair(GL_RGBA8I, GL_RGBA_INTEGER)));
-	m_Formats.insert(std::make_pair(RGBA8_UINT,		
-					std::make_pair(GL_RGBA8UI, GL_RGBA_INTEGER)));
-	m_Formats.insert(std::make_pair(RGBA16_INT,		
-					std::make_pair(GL_RGBA16I, GL_RGBA_INTEGER)));
-	m_Formats.insert(std::make_pair(RGBA16_UINT,	
-					std::make_pair(GL_RGBA16UI, GL_RGBA_INTEGER)));
-	m_Formats.insert(std::make_pair(RGBA32_INT,		
-					std::make_pair(GL_RGBA32I, GL_RGBA_INTEGER)));
-	m_Formats.insert(std::make_pair(RGBA32_UINT,	
-					std::make_pair(GL_RGBA32UI, GL_RGBA_INTEGER)));
-	m_Formats.insert(std::make_pair(R8_UNORM,
-					std::make_pair(GL_R8, GL_RED)));
-	m_Formats.insert(std::make_pair(R16_UNORM,
-					std::make_pair(GL_R16, GL_RED)));
-	m_Formats.insert(std::make_pair(RG8_UNORM,
-					std::make_pair(GL_RG8, GL_RG)));
-	m_Formats.insert(std::make_pair(RG16_UNORM,
-					std::make_pair(GL_RG16, GL_RG)));
-	m_Formats.insert(std::make_pair(RGB5A1_UNORM,
-					std::make_pair(GL_RGB5_A1, GL_RGB)));
-	m_Formats.insert(std::make_pair(RGBA8_UNORM,
-					std::make_pair(GL_RGBA8, GL_RGBA)));
-	m_Formats.insert(std::make_pair(RGB10A2_UNORM,
-					std::make_pair(GL_RGB10_A2, GL_RGBA)));
-	m_Formats.insert(std::make_pair(RGBA16_UNORM,
-					std::make_pair(GL_RGBA16, GL_RGBA)));
-	m_Formats.insert(std::make_pair(RGBA8_SRGB_UNORM,
-					std::make_pair(GL_SRGB8_ALPHA8, GL_RGBA)));
-	m_Formats.insert(std::make_pair(D24_S8,
-					std::make_pair(GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL)));
+	fillFormats();
 
 	return true;
+}
+
+void COGLGraphicsAPI::shutdown()
+{
+	wglDeleteContext(oglRenderContext);
 }
 
 CTexture* COGLGraphicsAPI::createTexture(int width,
 	int height,
 	TEXTURE_BINDINGS binding,
-	TEXTURE_FORMATS format)
+	FORMATS format)
 {
 	COGLTexture* Tex = new COGLTexture();
 	//Create texture
@@ -214,10 +222,11 @@ CTexture* COGLGraphicsAPI::createTexture(int width,
 CShaderProgram* COGLGraphicsAPI::createShaderProgram(std::wstring vsfile,
 	std::wstring psfile)
 {
-	const char* source;
+	std::string source;
 	int result;
 	char log[512];
-	source = readShaderFile(vsfile);
+	readShaderFile(vsfile, source);
+	const char* vs_source = source.c_str();
 
 	COGLShaderProgram* ShaderProgram = new COGLShaderProgram();
 	COGLVertexShader* VS =
@@ -226,7 +235,7 @@ CShaderProgram* COGLGraphicsAPI::createShaderProgram(std::wstring vsfile,
 		dynamic_cast<COGLPixelShader*>(ShaderProgram->getPixelShader());
 
 	VS->m_VertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(VS->m_VertexShader, 1, &source, NULL);
+	glShaderSource(VS->m_VertexShader, 1, &vs_source, NULL);
 	glCompileShader(VS->m_VertexShader);
 
 	glGetShaderiv(VS->m_VertexShader, GL_COMPILE_STATUS, &result);
@@ -238,10 +247,11 @@ CShaderProgram* COGLGraphicsAPI::createShaderProgram(std::wstring vsfile,
 		return nullptr;
 	}
 
-	source = readShaderFile(psfile);
-	
+	readShaderFile(psfile, source);
+	const char* ps_source = source.c_str();
+
 	PS->m_PS = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(PS->m_PS, 1, &source, NULL);
+	glShaderSource(PS->m_PS, 1, &ps_source, NULL);
 	glCompileShader(PS->m_PS);
 
 	glGetShaderiv(PS->m_PS, GL_COMPILE_STATUS, &result);
@@ -293,7 +303,7 @@ void COGLGraphicsAPI::drawIndexed(unsigned int indices)
 
 void COGLGraphicsAPI::clearBackBuffer(float red, float green, float blue)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClearColor(red, green, blue, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -362,6 +372,105 @@ void COGLGraphicsAPI::updateBuffer(CBuffer* buffer, const void* data)
 	glBindBuffer(buff->m_Type, 0);
 }
 
+void COGLGraphicsAPI::setVertexBuffer(CBuffer* buffer, unsigned int size)
+{
+	if (buffer != nullptr)
+	{
+		COGLBuffer* buff = dynamic_cast<COGLBuffer*>(buffer);
+		if (buff->m_Buffer != 0)
+		{
+			glBindVertexBuffer(0, buff->m_Buffer, 0, size);
+		}
+		else
+		{
+			OutputDebugStringA("Buffer missing initialization.");
+		}
+	}
+	else
+	{
+		OutputDebugStringA("Empty buffer received.");
+	}
+}
+
+void COGLGraphicsAPI::setIndexBuffer(CBuffer* buffer)
+{
+	if (buffer != nullptr)
+	{
+		COGLBuffer* buff = dynamic_cast<COGLBuffer*>(buffer);
+		if (buff->m_Buffer != 0)
+		{
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buff->m_Buffer);
+		}
+		else
+		{
+			OutputDebugStringA("Buffer missing initialization.");
+		}
+	}
+	else
+	{
+		OutputDebugStringA("Empty buffer received.");
+	}
+}
+
+void COGLGraphicsAPI::setSamplerState(CTexture* texture, CSamplerState* sampler)
+{
+	if (!texture)
+	{
+		OutputDebugStringA("Invalid texture received.");
+		return;
+	}
+	if (!sampler)
+	{
+		OutputDebugStringA("Invaid sampler received.");
+		return;
+	}
+
+	COGLTexture* tex = dynamic_cast<COGLTexture*>(texture);
+
+	if (tex->m_iTexture == 0)
+	{
+		OutputDebugStringA("Texture missing initialization.");
+		return;
+	}
+
+	COGLSamplerState* samp = dynamic_cast<COGLSamplerState*>(sampler);
+
+	if (samp->m_Sampler == 0)
+	{
+		OutputDebugStringA("Sampler missing initialization.");
+		return;
+	}
+
+	glBindSampler(tex->m_iTexture, samp->m_Sampler);
+}
+
+void COGLGraphicsAPI::setConstantBuffer(unsigned int slot,
+	CBuffer* buffer,
+	SHADER_TYPE shaderType)
+{
+	if (buffer)
+	{
+		COGLBuffer* buff = dynamic_cast<COGLBuffer*>(buffer);
+		if (buff->m_Buffer != 0)
+		{
+			glBindBufferBase(GL_UNIFORM_BUFFER, slot, buff->m_Buffer);
+		}
+		else
+		{
+			OutputDebugStringA("Buffer not initialized received.");
+		}
+	}
+	else
+	{
+		OutputDebugStringA("Invalid buffer received.");
+	}
+}
+
+void COGLGraphicsAPI::swapBuffer()
+{
+	SwapBuffers(m_Handle);
+}
+
 CBuffer* COGLGraphicsAPI::createBuffer(const void* data,
 	unsigned int size,
 	BUFFER_TYPE type)
@@ -385,9 +494,7 @@ CBuffer* COGLGraphicsAPI::createBuffer(const void* data,
 			OGLBuffer->m_Type = GL_UNIFORM_BUFFER;
 			break;
 		}
-
 		glBindBuffer(OGLBuffer->m_Type, OGLBuffer->m_Buffer);
-
 		if (data != nullptr)
 		{			
 			glBufferData(OGLBuffer->m_Type, OGLBuffer->m_Size, data, GL_STATIC_DRAW);
@@ -396,7 +503,6 @@ CBuffer* COGLGraphicsAPI::createBuffer(const void* data,
 		{
 			glBufferData(OGLBuffer->m_Type, OGLBuffer->m_Size, nullptr, GL_STATIC_DRAW);
 		}
-
 		glBindBuffer(OGLBuffer->m_Type, 0);
 		return OGLBuffer;
 	}
@@ -410,30 +516,106 @@ CBuffer* COGLGraphicsAPI::createBuffer(const void* data,
 CInputLayout* COGLGraphicsAPI::createInputLayout(CShaderProgram* program, LAYOUT_DESC desc)
 {
 	COGLInputLayout* ILayout = new COGLInputLayout();
+	glGenVertexArrays(1, &ILayout->VAO);
 	glBindVertexArray(ILayout->VAO);
-	int size = 0;
 	for (int i = 0; i < desc.v_Layout.size(); i++)
 	{
-		switch (desc.v_Layout[i].s_Format)
-		{
-		case VEC_F:
-			size = 1;
-			break;
-		case VEC_2F:
-			size = 2;
-			break;
-		case VEC_3F:
-			size = 3;
-			break;
-		case VEC_4F:
-			size = 4;
-			break;
-		}
 
-		glVertexAttribFormat(i, size, GL_FLOAT, GL_FALSE, desc.v_Layout[i].s_Offset);
+		glVertexAttribFormat(i,
+			desc.v_Layout[i].s_NumElements,
+			GL_FLOAT, GL_FALSE,
+			desc.v_Layout[i].s_Offset);
 		glVertexAttribBinding(i, 0);
 		glEnableVertexAttribArray(i);
 	}
 	glBindVertexArray(0);
 	return ILayout;
+}
+
+CSamplerState* COGLGraphicsAPI::createSamplerState(FILTER_LEVEL mag,
+	FILTER_LEVEL min,
+	FILTER_LEVEL mip,
+	unsigned int anisotropic,
+	WRAPPING wrapMode)
+{
+	COGLSamplerState* sampler = new COGLSamplerState();
+
+	glGenSamplers(1, &sampler->m_Sampler);
+	
+	int mode;
+
+	switch (wrapMode)
+	{
+	case WRAP:
+		mode = GL_REPEAT;
+		break;
+	case MIRROR:
+		mode = GL_MIRRORED_REPEAT;
+		break;
+	case CLAMP:
+		mode = GL_CLAMP_TO_EDGE;
+		break;
+	case BORDER:
+		mode = GL_CLAMP_TO_BORDER;
+	case MIRROR_ONCE:
+		mode = GL_MIRROR_CLAMP_TO_EDGE;
+		break;
+	}
+
+
+	glSamplerParameteri(sampler->m_Sampler,
+		GL_TEXTURE_WRAP_S, mode);
+	glSamplerParameteri(sampler->m_Sampler,
+		GL_TEXTURE_WRAP_T, mode);
+
+	if (anisotropic > 0)
+	{
+		if (anisotropic > GL_MAX_TEXTURE_MAX_ANISOTROPY)
+		{
+			anisotropic = GL_MAX_TEXTURE_MAX_ANISOTROPY;
+		}
+		glSamplerParameterf(sampler->m_Sampler, GL_TEXTURE_MAX_ANISOTROPY, anisotropic);
+
+	}
+	
+	int maglevel;
+	switch (mag)
+	{
+	case FILTER_POINT:
+		maglevel = GL_NEAREST;
+		break;
+	case FILTER_LINEAR:
+		maglevel = GL_LINEAR;
+		break;
+	}
+
+	glSamplerParameteri(sampler->m_Sampler, GL_TEXTURE_MAG_FILTER, maglevel);
+
+	int minmipLevel;
+	if (min == FILTER_POINT)
+	{
+		if (mip == FILTER_POINT)
+		{
+			minmipLevel = GL_NEAREST_MIPMAP_NEAREST;
+		}
+		else
+		{
+			minmipLevel = GL_NEAREST_MIPMAP_LINEAR;
+		}
+	}
+	else if (min == FILTER_LINEAR)
+	{
+		if (mip == FILTER_LINEAR)
+		{
+			minmipLevel = GL_LINEAR_MIPMAP_NEAREST;
+		}
+		else
+		{
+			minmipLevel = GL_LINEAR_MIPMAP_LINEAR;
+		}
+	}
+
+	glSamplerParameteri(sampler->m_Sampler, GL_TEXTURE_MIN_FILTER, minmipLevel);
+
+	return sampler;
 }

@@ -1,6 +1,12 @@
 #include "COGLShaderProgram.h"
+#include "COGLVertexShader.h"
+#include "COGLPixelShader.h"
 
-COGLShaderProgram::COGLShaderProgram(){}
+COGLShaderProgram::COGLShaderProgram()
+{
+	m_pVertexShader = new COGLVertexShader();
+	m_pPixelShader = new COGLPixelShader();
+}
 
 COGLShaderProgram::~COGLShaderProgram()
 {

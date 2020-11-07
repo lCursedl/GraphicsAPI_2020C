@@ -8,13 +8,14 @@ class CDXGraphicsAPI :
 {
 public:
     bool init(HWND window)                                    override;
+    void shutdown()                                           override;
 
     //DEVICE
 
     CTexture* createTexture(int width,
         int height,
         TEXTURE_BINDINGS binding,
-        TEXTURE_FORMATS format)                               override;
+        FORMATS format)                               override;
 
     CShaderProgram* createShaderProgram(std::wstring vsfile,
         std::wstring psfile)                                  override;
@@ -25,6 +26,11 @@ public:
 
     CInputLayout* createInputLayout(CShaderProgram* program,
         LAYOUT_DESC desc)                                     override;
+    CSamplerState* createSamplerState(FILTER_LEVEL mag,
+        FILTER_LEVEL min,
+        FILTER_LEVEL mip,
+        unsigned int anisotropic,
+        WRAPPING wrapMode)                                    override;
 
     //DEVICE CONTEXT
 
@@ -36,6 +42,17 @@ public:
     void setInputLayout(CInputLayout* layout)                 override;
     void setRenderTarget(CTexture* texture, CTexture* depth)  override;
     void updateBuffer(CBuffer* buffer, const void* data)      override;
+    void setVertexBuffer(CBuffer* buffer, unsigned int size)  override;
+    void setIndexBuffer(CBuffer* buffer)                      override;
+    void setSamplerState(CTexture* texture,
+        CSamplerState* sampler)                               override;
+    void setConstantBuffer(unsigned int slot,
+        CBuffer* buffer,
+        SHADER_TYPE shaderType)                               override;
+
+    //SWAPCHAIN
+
+    void swapBuffer()                                         override;
 
 private:
     ID3D11Device*           m_Device;
@@ -44,9 +61,10 @@ private:
     CTexture*               m_BackBuffer;
     CTexture*               m_DepthStencil;
 
-    std::map<TEXTURE_FORMATS, DXGI_FORMAT> m_Formats;
+    std::map<FORMATS, DXGI_FORMAT> m_Formats;
 
     HRESULT compileShaderFromFile(std::wstring fileName,
         std::string shaderModel,
         ID3DBlob** ppBlobOut);
+    void fillFormats();
 };    

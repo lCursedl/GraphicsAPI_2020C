@@ -156,6 +156,7 @@
     <ClInclude Include="CDXInputLayout.h" />
     <ClInclude Include="CDXPixelShader.h" />
     <ClInclude Include="CDXRTV.h" />
+    <ClInclude Include="CDXSamplerState.h" />
     <ClInclude Include="CDXShaderProgram.h" />
     <ClInclude Include="CDXTexture.h" />
     <ClInclude Include="CDXVertexShader.h" />
@@ -167,6 +168,7 @@
     <ClInclude Include="COGLInputLayout.h" />
     <ClInclude Include="COGLPixelShader.h" />
     <ClInclude Include="COGLRTV.h" />
+    <ClInclude Include="COGLSamplerState.h" />
     <ClInclude Include="COGLShaderProgram.h" />
     <ClInclude Include="COGLTexture.h" />
     <ClInclude Include="COGLVertexShader.h" />
@@ -175,6 +177,7 @@
     <ClInclude Include="CShader.h" />
     <ClInclude Include="CShaderProgram.h" />
     <ClInclude Include="CTexture.h" />
+    <ClInclude Include="Formats.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CBuffer.cpp" />
@@ -183,6 +186,7 @@
     <ClCompile Include="CDXInputLayout.cpp" />
     <ClCompile Include="CDXPixelShader.cpp" />
     <ClCompile Include="CDXRTV.cpp" />
+    <ClCompile Include="CDXSamplerState.cpp" />
     <ClCompile Include="CDXShaderProgram.cpp" />
     <ClCompile Include="CDXTexture.cpp" />
     <ClCompile Include="CDXVertexShader.cpp" />
@@ -194,6 +198,7 @@
     <ClCompile Include="COGLInputLayout.cpp" />
     <ClCompile Include="COGLPixelShader.cpp" />
     <ClCompile Include="COGLRTV.cpp" />
+    <ClCompile Include="COGLSamplerState.cpp" />
     <ClCompile Include="COGLShaderProgram.cpp" />
     <ClCompile Include="COGLTexture.cpp" />
     <ClCompile Include="COGLVertexShader.cpp" />

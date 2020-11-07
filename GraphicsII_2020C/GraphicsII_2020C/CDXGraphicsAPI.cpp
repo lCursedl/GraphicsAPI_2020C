@@ -4,6 +4,7 @@
 #include "CDXBuffer.h"
 #include "CDXShaderProgram.h"
 #include "CDXInputLayout.h"
+#include "CDXSamplerState.h"
 
 bool CDXGraphicsAPI::init(HWND window)
 {
@@ -86,6 +87,7 @@ bool CDXGraphicsAPI::init(HWND window)
 		&backBuffer->m_pTexture);
 	if (FAILED(hr))
 	{
+		delete backBuffer;
 		return false;
 	}
 
@@ -94,6 +96,7 @@ bool CDXGraphicsAPI::init(HWND window)
 		NULL, &backBuffer->m_pRTV);
 	if (FAILED(hr))
 	{
+		delete backBuffer;
 		return false;
 	}
 
@@ -146,58 +149,28 @@ bool CDXGraphicsAPI::init(HWND window)
 	//Set Viewport
 	setViewport(width, height);
 
-	m_Formats.insert(std::make_pair(R8_SNORM,		DXGI_FORMAT_R8_SNORM));
-	m_Formats.insert(std::make_pair(R16_SNORM,		DXGI_FORMAT_R16_SNORM));
-	m_Formats.insert(std::make_pair(RG8_SNORM,		DXGI_FORMAT_R8G8_SNORM));
-	m_Formats.insert(std::make_pair(RG16_SNORM,		DXGI_FORMAT_R16G16_SNORM));
-	m_Formats.insert(std::make_pair(RGB10_A2UI,		DXGI_FORMAT_R10G10B10A2_UINT));
-	m_Formats.insert(std::make_pair(R16_FLOAT,		DXGI_FORMAT_R16_FLOAT));
-	m_Formats.insert(std::make_pair(RG16_FLOAT,		DXGI_FORMAT_R16G16_FLOAT));
-	m_Formats.insert(std::make_pair(RGBA16_FLOAT,	DXGI_FORMAT_R16G16B16A16_FLOAT));
-	m_Formats.insert(std::make_pair(R32_FLOAT,		DXGI_FORMAT_R32_FLOAT));
-	m_Formats.insert(std::make_pair(RG32_FLOAT,		DXGI_FORMAT_R32G32_FLOAT));
-	m_Formats.insert(std::make_pair(RGB32_FLOAT,	DXGI_FORMAT_R32G32B32_FLOAT));
-	m_Formats.insert(std::make_pair(RGBA32_FLOAT,	DXGI_FORMAT_R32G32B32A32_FLOAT));
-	m_Formats.insert(std::make_pair(RG11B10_FLOAT,	DXGI_FORMAT_R11G11B10_FLOAT));
-	m_Formats.insert(std::make_pair(RGB9_E5,		DXGI_FORMAT_R9G9B9E5_SHAREDEXP));
-	m_Formats.insert(std::make_pair(R8_INT,			DXGI_FORMAT_R8_SINT));
-	m_Formats.insert(std::make_pair(R8_UINT,		DXGI_FORMAT_R8_UINT));
-	m_Formats.insert(std::make_pair(R16_INT,		DXGI_FORMAT_R16_SINT));
-	m_Formats.insert(std::make_pair(R16_UINT,		DXGI_FORMAT_R16_UINT));
-	m_Formats.insert(std::make_pair(R32_INT,		DXGI_FORMAT_R32_SINT));
-	m_Formats.insert(std::make_pair(R32_UINT,		DXGI_FORMAT_R32_UINT));
-	m_Formats.insert(std::make_pair(RG8_INT,		DXGI_FORMAT_R8G8_SINT));
-	m_Formats.insert(std::make_pair(RG8_UINT,		DXGI_FORMAT_R8G8_UINT));
-	m_Formats.insert(std::make_pair(RG16_INT,		DXGI_FORMAT_R16G16_SINT));
-	m_Formats.insert(std::make_pair(RG16_UINT,		DXGI_FORMAT_R16G16_UINT));
-	m_Formats.insert(std::make_pair(RG32_INT,		DXGI_FORMAT_R32G32_SINT));
-	m_Formats.insert(std::make_pair(RG32_UINT,		DXGI_FORMAT_R32G32_UINT));
-	m_Formats.insert(std::make_pair(RGB32_INT,		DXGI_FORMAT_R32G32B32_SINT));
-	m_Formats.insert(std::make_pair(RGB32_UINT,		DXGI_FORMAT_R32G32B32_UINT));
-	m_Formats.insert(std::make_pair(RGBA8_INT,		DXGI_FORMAT_R8G8B8A8_SINT));
-	m_Formats.insert(std::make_pair(RGBA8_UINT,		DXGI_FORMAT_R8G8B8A8_UINT));
-	m_Formats.insert(std::make_pair(RGBA16_INT,		DXGI_FORMAT_R16G16B16A16_SINT));
-	m_Formats.insert(std::make_pair(RGBA16_UINT,	DXGI_FORMAT_R16G16B16A16_UINT));
-	m_Formats.insert(std::make_pair(RGBA32_INT,		DXGI_FORMAT_R32G32B32A32_SINT));
-	m_Formats.insert(std::make_pair(RGBA32_UINT,	DXGI_FORMAT_R32G32B32A32_UINT));
-	m_Formats.insert(std::make_pair(R8_UNORM,		DXGI_FORMAT_R8_UNORM));
-	m_Formats.insert(std::make_pair(R16_UNORM,		DXGI_FORMAT_R16_UNORM));
-	m_Formats.insert(std::make_pair(RG8_UNORM,		DXGI_FORMAT_R8G8_UNORM));
-	m_Formats.insert(std::make_pair(RG16_UNORM,		DXGI_FORMAT_R16G16_UNORM));
-	m_Formats.insert(std::make_pair(RGB5A1_UNORM,	DXGI_FORMAT_B5G5R5A1_UNORM));
-	m_Formats.insert(std::make_pair(RGBA8_UNORM,	DXGI_FORMAT_R8G8B8A8_UNORM));
-	m_Formats.insert(std::make_pair(RGB10A2_UNORM,	DXGI_FORMAT_R10G10B10A2_UNORM));
-	m_Formats.insert(std::make_pair(RGBA16_UNORM,	DXGI_FORMAT_R16G16B16A16_UNORM));
-	m_Formats.insert(std::make_pair(RGBA8_SRGB_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB));
-	m_Formats.insert(std::make_pair(D24_S8,			DXGI_FORMAT_D24_UNORM_S8_UINT));
+	//Set topology
+	m_DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	fillFormats();
 
 	return true;
+}
+
+void CDXGraphicsAPI::shutdown()
+{
+	m_DeviceContext->ClearState();
+	delete m_DepthStencil;
+	delete m_BackBuffer;
+	m_SwapChain->Release();
+	m_DeviceContext->Release();
+	m_Device->Release();
 }
 
 CTexture* CDXGraphicsAPI::createTexture(int width,
 	int height,
 	TEXTURE_BINDINGS binding,
-	TEXTURE_FORMATS format)
+	FORMATS format)
 {
 	if (m_Device != nullptr)
 	{
@@ -442,22 +415,7 @@ CInputLayout* CDXGraphicsAPI::createInputLayout(CShaderProgram* program,
 			break;
 		}
 		//FORMAT
-		switch (desc.v_Layout[i].s_Format)
-		{
-		case VEC_F:
-			D.Format = DXGI_FORMAT_R32_FLOAT;
-			break;
-		case VEC_2F:
-			D.Format = DXGI_FORMAT_R32G32_FLOAT;
-			break;
-		case VEC_3F:
-			D.Format = DXGI_FORMAT_R32G32B32_FLOAT;
-			break;
-		case VEC_4F:
-			D.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-			break;
-		}
-
+		D.Format = m_Formats[desc.v_Layout[i].s_Format];
 		D.InputSlot = 0;
 		D.AlignedByteOffset = desc.v_Layout[i].s_Offset;
 		D.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
@@ -481,6 +439,90 @@ CInputLayout* CDXGraphicsAPI::createInputLayout(CShaderProgram* program,
 	}
 
 	return ILayout;
+}
+
+CSamplerState* CDXGraphicsAPI::createSamplerState(FILTER_LEVEL mag,
+	FILTER_LEVEL min,
+	FILTER_LEVEL mip,
+	unsigned int anisotropic,
+	WRAPPING wrapMode)
+{
+	D3D11_SAMPLER_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+
+	desc.AddressU = (D3D11_TEXTURE_ADDRESS_MODE)wrapMode;
+	desc.AddressV = (D3D11_TEXTURE_ADDRESS_MODE)wrapMode;
+	desc.AddressW = (D3D11_TEXTURE_ADDRESS_MODE)wrapMode;
+	desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	desc.MinLOD = 0;
+	desc.MaxLOD = D3D11_FLOAT32_MAX;
+	
+	if (anisotropic > D3D11_MAX_MAXANISOTROPY)
+	{
+		anisotropic = D3D11_MAX_MAXANISOTROPY;
+	}
+
+	desc.MaxAnisotropy = anisotropic;
+
+	if (mag == FILTER_POINT)
+	{
+		if (min == FILTER_POINT)
+		{
+			if (mip == FILTER_POINT)
+			{
+				desc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+			}
+			else
+			{
+				desc.Filter = D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR;
+			}
+		}
+		else
+		{
+			if (mip == FILTER_POINT)
+			{
+				desc.Filter = D3D11_FILTER_MIN_LINEAR_MAG_MIP_POINT;
+			}
+			else
+			{
+				desc.Filter = D3D11_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+			}
+		}
+	}
+	else
+	{
+		if (min == FILTER_POINT)
+		{
+			if (mip == FILTER_POINT)
+			{
+				desc.Filter = D3D11_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT;
+			}
+			else
+			{
+				desc.Filter = D3D11_FILTER_MIN_POINT_MAG_MIP_LINEAR;
+			}
+		}
+		else
+		{
+			if (mip == FILTER_POINT)
+			{
+				desc.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+			}
+			else
+			{
+				desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+			}
+		}
+	}
+	
+	CDXSamplerState* sampler = new CDXSamplerState();
+
+	if (FAILED(m_Device->CreateSamplerState(&desc, &sampler->m_Sampler)))
+	{
+		return nullptr;
+	}
+
+	return sampler;
 }
 
 void CDXGraphicsAPI::setBackBuffer()
@@ -606,7 +648,101 @@ void CDXGraphicsAPI::updateBuffer(CBuffer* buffer, const void* data)
 		OutputDebugStringA("Buffer not initialized, can't update data.");
 		return;
 	}
-	m_DeviceContext->UpdateSubresource(buff->m_Buffer, 0, NULL, data, 0, 0);
+	m_DeviceContext->UpdateSubresource(buff->m_Buffer, 0, nullptr, data, 0, 0);
+}
+
+void CDXGraphicsAPI::setVertexBuffer(CBuffer* buffer, unsigned int size)
+{
+	if (buffer != nullptr)
+	{
+		CDXBuffer* buff = dynamic_cast<CDXBuffer*>(buffer);
+		if (buff->m_Buffer != nullptr)
+		{
+			unsigned int offset = 0;
+			m_DeviceContext->IASetVertexBuffers(0, 1, &buff->m_Buffer, &size, &offset);
+		}
+		else
+		{
+			OutputDebugStringA("Buffer missing initialization.");
+		}
+	}
+	else
+	{
+		OutputDebugStringA("Empty buffer received.");
+	}
+}
+
+void CDXGraphicsAPI::setIndexBuffer(CBuffer* buffer)
+{
+	if (buffer != nullptr)
+	{
+		CDXBuffer* buff = dynamic_cast<CDXBuffer*>(buffer);
+		if (buff->m_Buffer != nullptr)
+		{
+			m_DeviceContext->IASetIndexBuffer(buff->m_Buffer, DXGI_FORMAT_R32_UINT, 0);
+		}
+		else
+		{
+			OutputDebugStringA("Buffer missing initialization.");
+		}
+	}
+	else
+	{
+		OutputDebugStringA("Empty buffer received.");
+	}
+}
+
+void CDXGraphicsAPI::setSamplerState(CTexture* texture, CSamplerState* sampler)
+{
+	if (!sampler)
+	{
+		OutputDebugStringA("Invalid sampler received.");
+		return;
+	}
+
+	CDXSamplerState* samp = dynamic_cast<CDXSamplerState*>(sampler);
+
+	if (!samp->m_Sampler)
+	{
+		OutputDebugStringA("Sampler missing initialization.");
+		return;
+	}
+
+	m_DeviceContext->PSSetSamplers(0, 1, &samp->m_Sampler);
+}
+
+void CDXGraphicsAPI::setConstantBuffer(unsigned int slot,
+	CBuffer* buffer,
+	SHADER_TYPE shaderType)
+{
+	if (buffer)
+	{
+		CDXBuffer* buff = dynamic_cast<CDXBuffer*>(buffer);
+		if (buff)
+		{
+			if (shaderType == VERTEX_SHADER)
+			{
+				m_DeviceContext->VSSetConstantBuffers(slot, 1, &buff->m_Buffer);
+			}
+			else
+			{
+				m_DeviceContext->PSSetConstantBuffers(slot, 1, &buff->m_Buffer);
+			}
+		}
+		else
+		{
+			OutputDebugStringA("Buffer not initialized received");
+		}
+	}
+	else
+	{
+		OutputDebugStringA("Invalid buffer received.");
+	}
+}
+
+void CDXGraphicsAPI::swapBuffer()
+{
+	m_SwapChain->Present(0, 0);
 }
 
 HRESULT CDXGraphicsAPI::compileShaderFromFile(std::wstring fileName,
@@ -641,4 +777,52 @@ HRESULT CDXGraphicsAPI::compileShaderFromFile(std::wstring fileName,
 	}
 
 	return S_OK;
+}
+
+void CDXGraphicsAPI::fillFormats()
+{
+	m_Formats.insert(std::make_pair(R8_SNORM, DXGI_FORMAT_R8_SNORM));
+	m_Formats.insert(std::make_pair(R16_SNORM, DXGI_FORMAT_R16_SNORM));
+	m_Formats.insert(std::make_pair(RG8_SNORM, DXGI_FORMAT_R8G8_SNORM));
+	m_Formats.insert(std::make_pair(RG16_SNORM, DXGI_FORMAT_R16G16_SNORM));
+	m_Formats.insert(std::make_pair(RGB10_A2UI, DXGI_FORMAT_R10G10B10A2_UINT));
+	m_Formats.insert(std::make_pair(R16_FLOAT, DXGI_FORMAT_R16_FLOAT));
+	m_Formats.insert(std::make_pair(RG16_FLOAT, DXGI_FORMAT_R16G16_FLOAT));
+	m_Formats.insert(std::make_pair(RGBA16_FLOAT, DXGI_FORMAT_R16G16B16A16_FLOAT));
+	m_Formats.insert(std::make_pair(R32_FLOAT, DXGI_FORMAT_R32_FLOAT));
+	m_Formats.insert(std::make_pair(RG32_FLOAT, DXGI_FORMAT_R32G32_FLOAT));
+	m_Formats.insert(std::make_pair(RGB32_FLOAT, DXGI_FORMAT_R32G32B32_FLOAT));
+	m_Formats.insert(std::make_pair(RGBA32_FLOAT, DXGI_FORMAT_R32G32B32A32_FLOAT));
+	m_Formats.insert(std::make_pair(RG11B10_FLOAT, DXGI_FORMAT_R11G11B10_FLOAT));
+	m_Formats.insert(std::make_pair(RGB9_E5, DXGI_FORMAT_R9G9B9E5_SHAREDEXP));
+	m_Formats.insert(std::make_pair(R8_INT, DXGI_FORMAT_R8_SINT));
+	m_Formats.insert(std::make_pair(R8_UINT, DXGI_FORMAT_R8_UINT));
+	m_Formats.insert(std::make_pair(R16_INT, DXGI_FORMAT_R16_SINT));
+	m_Formats.insert(std::make_pair(R16_UINT, DXGI_FORMAT_R16_UINT));
+	m_Formats.insert(std::make_pair(R32_INT, DXGI_FORMAT_R32_SINT));
+	m_Formats.insert(std::make_pair(R32_UINT, DXGI_FORMAT_R32_UINT));
+	m_Formats.insert(std::make_pair(RG8_INT, DXGI_FORMAT_R8G8_SINT));
+	m_Formats.insert(std::make_pair(RG8_UINT, DXGI_FORMAT_R8G8_UINT));
+	m_Formats.insert(std::make_pair(RG16_INT, DXGI_FORMAT_R16G16_SINT));
+	m_Formats.insert(std::make_pair(RG16_UINT, DXGI_FORMAT_R16G16_UINT));
+	m_Formats.insert(std::make_pair(RG32_INT, DXGI_FORMAT_R32G32_SINT));
+	m_Formats.insert(std::make_pair(RG32_UINT, DXGI_FORMAT_R32G32_UINT));
+	m_Formats.insert(std::make_pair(RGB32_INT, DXGI_FORMAT_R32G32B32_SINT));
+	m_Formats.insert(std::make_pair(RGB32_UINT, DXGI_FORMAT_R32G32B32_UINT));
+	m_Formats.insert(std::make_pair(RGBA8_INT, DXGI_FORMAT_R8G8B8A8_SINT));
+	m_Formats.insert(std::make_pair(RGBA8_UINT, DXGI_FORMAT_R8G8B8A8_UINT));
+	m_Formats.insert(std::make_pair(RGBA16_INT, DXGI_FORMAT_R16G16B16A16_SINT));
+	m_Formats.insert(std::make_pair(RGBA16_UINT, DXGI_FORMAT_R16G16B16A16_UINT));
+	m_Formats.insert(std::make_pair(RGBA32_INT, DXGI_FORMAT_R32G32B32A32_SINT));
+	m_Formats.insert(std::make_pair(RGBA32_UINT, DXGI_FORMAT_R32G32B32A32_UINT));
+	m_Formats.insert(std::make_pair(R8_UNORM, DXGI_FORMAT_R8_UNORM));
+	m_Formats.insert(std::make_pair(R16_UNORM, DXGI_FORMAT_R16_UNORM));
+	m_Formats.insert(std::make_pair(RG8_UNORM, DXGI_FORMAT_R8G8_UNORM));
+	m_Formats.insert(std::make_pair(RG16_UNORM, DXGI_FORMAT_R16G16_UNORM));
+	m_Formats.insert(std::make_pair(RGB5A1_UNORM, DXGI_FORMAT_B5G5R5A1_UNORM));
+	m_Formats.insert(std::make_pair(RGBA8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM));
+	m_Formats.insert(std::make_pair(RGB10A2_UNORM, DXGI_FORMAT_R10G10B10A2_UNORM));
+	m_Formats.insert(std::make_pair(RGBA16_UNORM, DXGI_FORMAT_R16G16B16A16_UNORM));
+	m_Formats.insert(std::make_pair(RGBA8_SRGB_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB));
+	m_Formats.insert(std::make_pair(D24_S8, DXGI_FORMAT_D24_UNORM_S8_UINT));
 }
