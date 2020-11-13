@@ -117,6 +117,9 @@
     <ClInclude Include="Formats.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CCamera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
@@ -205,6 +208,9 @@
     </ClCompile>
     <ClCompile Include="COGLSamplerState.cpp">
       <Filter>Source Files\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="CCamera.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -41,7 +41,7 @@ public:
     void setViewport(int width, int height)                   override;
     void setShaders(CShaderProgram* program)                  override;
     void drawIndexed(unsigned int indices)                    override;
-    void clearBackBuffer(float red, float green, float blue)  override;
+    void clearBackBuffer(COLOR color)                         override;
     void setInputLayout(CInputLayout* layout)                 override;
     void setRenderTarget(CTexture* texture, CTexture* depth)  override;
     void updateBuffer(CBuffer* buffer, const void* data)      override;
@@ -52,7 +52,10 @@ public:
     void setConstantBuffer(unsigned int slot,
         CBuffer* buffer,
         SHADER_TYPE shaderType)                               override;
+    void clearRenderTarget(CTexture* rt, COLOR color)         override;
+    void clearDepthStencil(CTexture* ds)                      override;
 
     //SWAPCHAIN
+
     void swapBuffer()                                         override;
 };

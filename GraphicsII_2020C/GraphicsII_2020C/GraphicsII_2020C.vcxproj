@@ -151,6 +151,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CBuffer.h" />
+    <ClInclude Include="CCamera.h" />
     <ClInclude Include="CDXBuffer.h" />
     <ClInclude Include="CDXGraphicsAPI.h" />
     <ClInclude Include="CDXInputLayout.h" />
@@ -181,6 +182,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CBuffer.cpp" />
+    <ClCompile Include="CCamera.cpp" />
     <ClCompile Include="CDXBuffer.cpp" />
     <ClCompile Include="CDXGraphicsAPI.cpp" />
     <ClCompile Include="CDXInputLayout.cpp" />

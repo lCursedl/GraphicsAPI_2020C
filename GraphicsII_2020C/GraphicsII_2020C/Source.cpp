@@ -1,9 +1,6 @@
 #include "CDXGraphicsAPI.h"
 #include "COGLGraphicsAPI.h"
-#include <glm/vec2.hpp>
-#include "glm/vec3.hpp"
-#include "glm/vec4.hpp"
-#include "glm/gtc/matrix_transform.hpp"
+#include "CCamera.h"
 
 struct Vertex
 {
@@ -14,20 +11,28 @@ struct Vertex
 struct Matrices
 {
 	glm::mat4 World;
-	glm::mat4 View;
 	glm::mat4 Projection;
 	glm::vec4 Color;
+};
+
+struct ViewCB
+{
+	glm::mat4 View;
 };
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 void Load(CGraphicsAPI* api);
 void Render(CGraphicsAPI* api);
 void Clear();
+void Update(CGraphicsAPI* api);
 
 CBuffer* vb = nullptr;
 CBuffer* ib = nullptr;
 CBuffer* cbMatrices = nullptr;
+CBuffer* cbView = nullptr;
 CShaderProgram* sp = nullptr;
+CInputLayout* layout = nullptr;
+CCamera Cam;
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow)
 {
@@ -77,6 +82,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 		}
 		else
 		{
+			Update(graphicsAPI);
 			Render(graphicsAPI);
 		}
 	}
@@ -99,6 +105,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
+	case WM_KEYDOWN:
+		Cam.getKeyPress(wParam);
+		break;
+	case WM_KEYUP:
+		Cam.getKeyRelease(wParam);
+		break;
+	case WM_RBUTTONDOWN:
+		POINT MousePoint;
+		GetCursorPos(&MousePoint);
+		Cam.mInitPos = { MousePoint.x, MousePoint.y, 0.f };
+		Cam.mIsClicked = true;
+		break;
+	case WM_RBUTTONUP:
+		Cam.mIsClicked = false;
+		break;
+	case WM_MOUSEMOVE:		
+		if (Cam.mIsClicked)
+		{
+			POINT EndPoint;
+			GetCursorPos(&EndPoint);
+			Cam.mEndPos = { EndPoint.x, EndPoint.y, 0.f };
+			SetCursorPos(Cam.mInitPos.x, Cam.mInitPos.y);
+			Cam.mDir = Cam.mInitPos - Cam.mEndPos;
+			Cam.rotate(Cam.mDir);
+		}
+		break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
@@ -110,12 +142,13 @@ void Clear()
 	delete vb;
 	delete ib;
 	delete cbMatrices;
+	delete cbView;
+	delete layout;
 	delete sp;
 }
 
 void Load(CGraphicsAPI* api)
 {
-	int error;
 	//Compile and create vertex / pixel shader
 	sp = api->createShaderProgram(L"DX_VS.fx", L"DX_PS.fx");
 	//Define input layout
@@ -123,7 +156,7 @@ void Load(CGraphicsAPI* api)
 	lDesc.addToDesc(POSITION, RGB32_FLOAT, 0, 3);
 	lDesc.addToDesc(TEXCOORD, RG32_FLOAT, 12, 2);
 	//Create input layout
-	CInputLayout* layout = api->createInputLayout(sp, lDesc);
+	layout = api->createInputLayout(sp, lDesc);
 	//Define vertex buffer
 	std::vector<Vertex>vertices;
 	vertices.push_back({ glm::vec3(-1.0f, 1.0f, -1.0f),	glm::vec2(0.0f, 0.0f) });
@@ -180,34 +213,53 @@ void Load(CGraphicsAPI* api)
 	ib = api->createBuffer(indices.data(), sizeof(unsigned int) * 36, INDEX_BUFFER);
 	//Create constant buffer
 	cbMatrices = api->createBuffer(nullptr, sizeof(Matrices), CONST_BUFFER);
+	cbView = api->createBuffer(nullptr, sizeof(ViewCB), CONST_BUFFER);
+	//Initialize VM and PM of camera
+	CameraDesc desc;
+	desc.Pos = { 0.f, 3.f, -6.f };
+	desc.LAt = { 0.f, 1.f, 0.f };
+	desc.Up = { 0.f, 1.f, 0.f };
+	desc.FOV = 0.785398f;
+	desc.Width = 800.f;
+	desc.Height = 600.f;
+	desc.NearPlane = 0.01f;
+	desc.FarPlane = 100.f;
+
+	Cam.setAPIMatrix(api);
+	Cam.init(desc);
+	
 	//Create structure to update CB
 	Matrices mat;
 	//Assign world matrix as identity
 	mat.World = glm::mat4(1.0f);
-	//Set view position, look at & up
-	glm::vec3 Eye(0.0f, 3.0f, -6.0f);
-	glm::vec3 LAt(0.0f, 1.0f, 0.0f);
-	glm::vec3 Up(0.0f, 1.0f, 0.0f);
-	//Generate View matrix
-	mat.View = glm::transpose(glm::lookAtLH(Eye, LAt, Up));
 	//Generate Projection matrix
-	mat.Projection = glm::transpose(
-		glm::perspectiveFovLH(0.785398f, 800.f, 600.f, 0.01f, 100.f));
-	mat.Color = {1.0f, 0.0f, 0.0f, 1.0f};
-	
-	api->updateBuffer(cbMatrices, &mat);
-	api->setInputLayout(layout);
-	api->setVertexBuffer(vb, sizeof(Vertex));
-	api->setIndexBuffer(ib);
+	mat.Projection = Cam.getProjection();
+	mat.Color = { 1.0f, 0.0f, 0.0f, 1.0f };
+	api->updateBuffer(cbMatrices, &mat);	
 }
 
 void Render(CGraphicsAPI* api)
 {
-	api->clearBackBuffer(0.0f, 0.125f, 0.3f);
-
+	api->clearBackBuffer({ 0.0f, 0.125f, 0.3f, 1.0f });
 	api->setShaders(sp);
-	api->setConstantBuffer(0, cbMatrices, VERTEX_SHADER);
+	
+	api->setInputLayout(layout);
+	api->setVertexBuffer(vb, sizeof(Vertex));
+	api->setIndexBuffer(ib);
+
+	api->setConstantBuffer(0, cbMatrices, VERTEX_SHADER);	
+	api->setConstantBuffer(1, cbView, VERTEX_SHADER);
 	api->setConstantBuffer(0, cbMatrices, PIXEL_SHADER);
+
 	api->drawIndexed(36);
 	api->swapBuffer();
+}
+
+void Update(CGraphicsAPI* api)
+{
+	Cam.move();
+	Cam.rotate();
+	ViewCB vm;
+	vm.View = Cam.getView();
+	api->updateBuffer(cbView, &vm);
 }

@@ -2,19 +2,30 @@
 #include "CBuffer.h"
 #include <glad/glad.h>
 
+/** \class COGLBuffer
+*   \brief Class which holds info for an OpenGL buffer.
+*/
 class COGLBuffer :
     public CBuffer
 {
 public:
 
     COGLBuffer();
+    /** \fn COGLBuffer()
+    *   \brief Class constructor.
+    */
+
     ~COGLBuffer();
+    /** \fn ~COGLBuffer()
+    *   \brief Class destructor.
+    *   If m_Buffer was used, release memory before deleting object.
+    */
 
 private:
 
-    unsigned int m_Type;
-    unsigned int m_Size;
-    unsigned int m_Buffer;
+    unsigned int m_Type;    /**< unsigned int for buffer type storing */
+    unsigned int m_Size;    /**< unsigned int for buffer size storing */
+    unsigned int m_Buffer;  /**< unsigned int for OpenGL buffer index */
 
     friend class COGLGraphicsAPI;
 };

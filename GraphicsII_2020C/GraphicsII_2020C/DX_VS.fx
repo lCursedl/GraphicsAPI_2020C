@@ -10,9 +10,13 @@
 cbuffer ConstantBuffer : register( b0 )
 {
 	matrix World;
-    matrix View;
 	matrix Projection;	
     float4 vMeshColor;
+};
+
+cbuffer ViewConstantBuffer : register (b1)
+{
+	matrix View;
 };
 //--------------------------------------------------------------------------------------
 struct VS_INPUT

@@ -559,9 +559,9 @@ void CDXGraphicsAPI::drawIndexed(unsigned int indices)
 	m_DeviceContext->DrawIndexed(indices, 0, 0);
 }
 
-void CDXGraphicsAPI::clearBackBuffer(float red, float green, float blue)
+void CDXGraphicsAPI::clearBackBuffer(COLOR color)
 {
-	float Color[4] = { red, green, blue, 1.0f };
+	float Color[4] = { color.red, color.green, color.blue, color.alpha };
 	m_DeviceContext->ClearRenderTargetView(
 		dynamic_cast<CDXTexture*>(m_BackBuffer)->m_pRTV,
 		Color);
@@ -738,6 +738,42 @@ void CDXGraphicsAPI::setConstantBuffer(unsigned int slot,
 	{
 		OutputDebugStringA("Invalid buffer received.");
 	}
+}
+
+void CDXGraphicsAPI::clearRenderTarget(CTexture* rt, COLOR color)
+{
+	if (!rt)
+	{
+		OutputDebugStringA("Invalid Render Target received");
+		return;
+	}
+	CDXTexture* tex = dynamic_cast<CDXTexture*>(rt);
+	if (!tex->m_pRTV)
+	{
+		OutputDebugStringA("Render Target not initialized received");
+		return;
+	}
+	float c[4] = { color.red, color.green, color.blue, color.alpha };
+	m_DeviceContext->ClearRenderTargetView(tex->m_pRTV, c);
+}
+
+void CDXGraphicsAPI::clearDepthStencil(CTexture* ds)
+{
+	if (!ds)
+	{
+		OutputDebugStringA("Invalid Depth Stencil received.");
+		return;
+	}
+	CDXTexture* depth = dynamic_cast<CDXTexture*>(ds);
+	if (!depth->m_pDSV)
+	{
+		OutputDebugStringA("Depth Stencil not initialized received.");
+		return;
+	}
+	m_DeviceContext->ClearDepthStencilView(depth->m_pDSV,
+		D3D11_CLEAR_DEPTH,
+		1.0f,
+		0);
 }
 
 void CDXGraphicsAPI::swapBuffer()

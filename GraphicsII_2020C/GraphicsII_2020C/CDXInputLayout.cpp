@@ -1,6 +1,9 @@
 #include "CDXInputLayout.h"
 
-CDXInputLayout::CDXInputLayout(){}
+CDXInputLayout::CDXInputLayout()
+{
+	m_InputLayout = nullptr;
+}
 
 CDXInputLayout::~CDXInputLayout()
 {

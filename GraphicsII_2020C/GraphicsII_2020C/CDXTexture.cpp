@@ -1,6 +1,12 @@
 #include "CDXTexture.h"
 
-CDXTexture::CDXTexture(){}
+CDXTexture::CDXTexture()
+{
+    m_pTexture = nullptr;
+    m_pRTV = nullptr;
+    m_pDSV = nullptr;
+    m_pSRV = nullptr;
+}
 
 CDXTexture::~CDXTexture()
 {

@@ -301,10 +301,10 @@ void COGLGraphicsAPI::drawIndexed(unsigned int indices)
 	glDrawElements(GL_TRIANGLES, indices, GL_UNSIGNED_INT, 0);
 }
 
-void COGLGraphicsAPI::clearBackBuffer(float red, float green, float blue)
+void COGLGraphicsAPI::clearBackBuffer(COLOR color)
 {
 	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClearColor(red, green, blue, 1.0f);
+	glClearColor(color.red, color.green, color.blue, color.alpha);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -324,10 +324,18 @@ void COGLGraphicsAPI::setRenderTarget(CTexture* texture, CTexture* depth)
 			if (depth)
 			{
 				COGLTexture* d = dynamic_cast<COGLTexture*>(depth);
-				glFramebufferRenderbuffer(GL_FRAMEBUFFER,
-					GL_DEPTH_STENCIL_ATTACHMENT,
-					GL_RENDERBUFFER,
-					d->m_iTexture);
+				if (d->m_iTexture != 0)
+				{
+					d->m_iFramebuffer = tex->m_iFramebuffer;
+					glFramebufferRenderbuffer(GL_FRAMEBUFFER,
+						GL_DEPTH_STENCIL_ATTACHMENT,
+						GL_RENDERBUFFER,
+						d->m_iTexture);
+				}
+				else
+				{
+					OutputDebugStringA("Invalid Depth Stencil received.");
+				}				
 			}
 			else
 			{
@@ -339,7 +347,7 @@ void COGLGraphicsAPI::setRenderTarget(CTexture* texture, CTexture* depth)
 		}
 		else
 		{
-			OutputDebugStringA("Invalid RenderTargetView.");
+			OutputDebugStringA("Invalid RenderTargetView received.");
 		}		
 	}
 	else
@@ -466,6 +474,43 @@ void COGLGraphicsAPI::setConstantBuffer(unsigned int slot,
 	}
 }
 
+void COGLGraphicsAPI::clearRenderTarget(CTexture* rt, COLOR color)
+{
+	if (!rt)
+	{
+		OutputDebugStringA("Invalid Render Target received.");
+		return;
+	}
+	COGLTexture* tex = dynamic_cast<COGLTexture*>(rt);
+	if (tex->m_iFramebuffer == 0)
+	{
+		OutputDebugStringA("Render target not initialized received.");
+		return;
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, tex->m_iFramebuffer);
+	glClearColor(color.red, color.green, color.blue, color.alpha);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void COGLGraphicsAPI::clearDepthStencil(CTexture* ds)
+{
+	if (!ds)
+	{
+		OutputDebugStringA("Invalid Depth Stencil received.");
+		return;
+	}
+	COGLTexture* depth = dynamic_cast<COGLTexture*>(ds);
+	if (depth->m_iTexture == 0 || depth->m_iFramebuffer == 0)
+	{
+		OutputDebugStringA("Depth Stencil not initialized received.");
+		return;
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, depth->m_iFramebuffer);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 void COGLGraphicsAPI::swapBuffer()
 {
 	SwapBuffers(m_Handle);
@@ -520,7 +565,6 @@ CInputLayout* COGLGraphicsAPI::createInputLayout(CShaderProgram* program, LAYOUT
 	glBindVertexArray(ILayout->VAO);
 	for (int i = 0; i < desc.v_Layout.size(); i++)
 	{
-
 		glVertexAttribFormat(i,
 			desc.v_Layout[i].s_NumElements,
 			GL_FLOAT, GL_FALSE,
