@@ -18,5 +18,5 @@ in vec4 psPos;
 
 void main()
 {
-	FragColor = Color;
+	FragColor = psPos;
 }

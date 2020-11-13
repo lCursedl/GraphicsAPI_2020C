@@ -179,14 +179,18 @@ CTexture* COGLGraphicsAPI::createTexture(int width,
 	FORMATS format)
 {
 	COGLTexture* Tex = new COGLTexture();
-	//Create texture
-	if (binding & RENDER_TARGET)
+	
+	if (binding == DEPTH_STENCIL)
 	{
-		glGenFramebuffers(1, &Tex->m_iFramebuffer);
-		glBindFramebuffer(GL_FRAMEBUFFER, Tex->m_iFramebuffer);
+		//Create RenderBufferObject for depth and stencil
+		glGenRenderbuffers(1, &Tex->m_iTexture);
+		glBindRenderbuffer(GL_RENDERBUFFER, Tex->m_iTexture);
+		glRenderbufferStorage(GL_RENDERBUFFER, m_Formats[format].first, width, height);
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	}
-	if (binding & SHADER_RESOURCE)
+	else
 	{
+		//Create texture
 		glGenTextures(1, &Tex->m_iTexture);
 		glBindTexture(GL_TEXTURE_2D, Tex->m_iTexture);
 		glTexImage2D(GL_TEXTURE_2D,
@@ -198,24 +202,23 @@ CTexture* COGLGraphicsAPI::createTexture(int width,
 			m_Formats[format].second,
 			GL_UNSIGNED_BYTE,
 			NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		if (Tex->m_iFramebuffer != 0)
+		if (binding & RENDER_TARGET)
 		{
+			glGenFramebuffers(1, &Tex->m_iFramebuffer);
+			glBindFramebuffer(GL_FRAMEBUFFER, Tex->m_iFramebuffer);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glFramebufferTexture2D(GL_FRAMEBUFFER,
 				GL_COLOR_ATTACHMENT0,
 				GL_TEXTURE_2D,
 				Tex->m_iTexture,
 				0);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
-	}	
-	if (binding & DEPTH_STENCIL)
-	{
-		//Create RenderBufferObject for depth and stencil
-		glGenRenderbuffers(1, &Tex->m_iTexture);
-		glBindRenderbuffer(GL_RENDERBUFFER, Tex->m_iTexture);
-		glRenderbufferStorage(GL_RENDERBUFFER, m_Formats[format].first, width, height);
 	}
+	int a = glGetError();
 	return Tex;
 }
 
@@ -490,7 +493,6 @@ void COGLGraphicsAPI::clearRenderTarget(CTexture* rt, COLOR color)
 	glBindFramebuffer(GL_FRAMEBUFFER, tex->m_iFramebuffer);
 	glClearColor(color.red, color.green, color.blue, color.alpha);
 	glClear(GL_COLOR_BUFFER_BIT);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void COGLGraphicsAPI::clearDepthStencil(CTexture* ds)
@@ -508,7 +510,6 @@ void COGLGraphicsAPI::clearDepthStencil(CTexture* ds)
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, depth->m_iFramebuffer);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void COGLGraphicsAPI::swapBuffer()

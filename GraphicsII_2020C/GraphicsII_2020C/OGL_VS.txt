@@ -15,9 +15,11 @@ layout(std140, binding = 1) uniform cbView
 };
 
 out vec2 Texcoord;
+out vec4 psPos;
 
 void main()
 {
-	gl_Position = Projection * View * World * vec4(aPosition, 1.0);
+	psPos = World * vec4(aPosition.xyz, 1.0);
+	gl_Position = Projection * View * psPos;
 	Texcoord = aTexcoord;
 }

@@ -31,7 +31,10 @@ CBuffer* ib = nullptr;
 CBuffer* cbMatrices = nullptr;
 CBuffer* cbView = nullptr;
 CShaderProgram* sp = nullptr;
+CShaderProgram* sp2 = nullptr;
 CInputLayout* layout = nullptr;
+CTexture* rtv = nullptr;
+CTexture* depthTex = nullptr;
 CCamera Cam;
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow)
@@ -144,13 +147,20 @@ void Clear()
 	delete cbMatrices;
 	delete cbView;
 	delete layout;
+	delete rtv;
+	delete depthTex;
 	delete sp;
+	delete sp2;
 }
 
 void Load(CGraphicsAPI* api)
 {
+	//Create rt for offscreen rendering
+	rtv = api->createTexture(800, 600, RENDER_TARGET, RGBA16_FLOAT);
+	depthTex = api->createTexture(800, 600, DEPTH_STENCIL, D24_S8);
 	//Compile and create vertex / pixel shader
 	sp = api->createShaderProgram(L"DX_VS.fx", L"DX_PS.fx");
+	sp2 = api->createShaderProgram(L"DX_VS.fx", L"DX_PS2.fx");
 	//Define input layout
 	LAYOUT_DESC lDesc;
 	lDesc.addToDesc(POSITION, RGB32_FLOAT, 0, 3);
@@ -235,23 +245,30 @@ void Load(CGraphicsAPI* api)
 	//Generate Projection matrix
 	mat.Projection = Cam.getProjection();
 	mat.Color = { 1.0f, 0.0f, 0.0f, 1.0f };
-	api->updateBuffer(cbMatrices, &mat);	
-}
+	api->updateBuffer(cbMatrices, &mat);
 
-void Render(CGraphicsAPI* api)
-{
-	api->clearBackBuffer({ 0.0f, 0.125f, 0.3f, 1.0f });
-	api->setShaders(sp);
-	
 	api->setInputLayout(layout);
 	api->setVertexBuffer(vb, sizeof(Vertex));
 	api->setIndexBuffer(ib);
 
-	api->setConstantBuffer(0, cbMatrices, VERTEX_SHADER);	
+	api->setConstantBuffer(0, cbMatrices, VERTEX_SHADER);
 	api->setConstantBuffer(1, cbView, VERTEX_SHADER);
 	api->setConstantBuffer(0, cbMatrices, PIXEL_SHADER);
+}
 
+void Render(CGraphicsAPI* api)
+{
+	api->setRenderTarget(rtv, depthTex);
+	api->clearRenderTarget(rtv, {1.f, 1.f, 1.f, 1.f});
+	api->clearDepthStencil(depthTex);	
+	api->setShaders(sp2);
 	api->drawIndexed(36);
+
+	api->setBackBuffer();
+	api->clearBackBuffer({ 0.0f, 0.125f, 0.3f, 1.0f });	
+	api->setShaders(sp);
+	api->drawIndexed(36);
+
 	api->swapBuffer();
 }
 

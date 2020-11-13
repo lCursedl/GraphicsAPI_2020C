@@ -13,17 +13,6 @@ cbuffer ConstantBuffer : register( b0 )
 	matrix Projection;	
     float4 vMeshColor;
 };
-
-cbuffer ViewConstantBuffer : register (b1)
-{
-	matrix View;
-};
-//--------------------------------------------------------------------------------------
-struct VS_INPUT
-{
-    float3 Pos : POSITION;
-    float2 Tex : TEXCOORD0;
-};
 //--------------------------------------------------------------------------------------
 struct PS_INPUT
 {
@@ -32,16 +21,9 @@ struct PS_INPUT
 	float3 wsPos : TEXCOORD1;
 };
 //--------------------------------------------------------------------------------------
-// Vertex Shader
+// Pixel Shader
 //--------------------------------------------------------------------------------------
-PS_INPUT main( VS_INPUT input )
+float4 main( PS_INPUT input) : SV_Target
 {
-    PS_INPUT output = (PS_INPUT)0;
-    float4 wsPos = mul( float4(input.Pos, 1.0f), World );
-    output.Pos = mul( wsPos, View );
-    output.Pos = mul( output.Pos, Projection );
-    output.Tex = input.Tex;
-	output.wsPos = wsPos;
-    
-    return output;
+    return float4(input.wsPos, 1.0f);
 }
