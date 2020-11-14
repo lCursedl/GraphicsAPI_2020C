@@ -2,6 +2,7 @@
 #include "CGraphicsAPI.h"
 #include <d3d11.h>
 #include <d3dcompiler.h>
+#include <algorithm>
 
 class CDXGraphicsAPI :
     public CGraphicsAPI
@@ -15,7 +16,7 @@ public:
     CTexture* createTexture(int width,
         int height,
         TEXTURE_BINDINGS binding,
-        FORMATS format)                               override;
+        FORMATS format)                                       override;
 
     CShaderProgram* createShaderProgram(std::wstring vsfile,
         std::wstring psfile)                                  override;

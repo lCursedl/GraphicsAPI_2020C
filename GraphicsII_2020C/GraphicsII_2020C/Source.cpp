@@ -71,7 +71,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 
 	ShowWindow(hwnd, nCmdShow);
 
-	CGraphicsAPI* graphicsAPI = new CDXGraphicsAPI();
+	CGraphicsAPI* graphicsAPI = new COGLGraphicsAPI();
 	graphicsAPI->init(hwnd);
 	Load(graphicsAPI);
 
@@ -159,8 +159,8 @@ void Load(CGraphicsAPI* api)
 	rtv = api->createTexture(800, 600, RENDER_TARGET, RGBA16_FLOAT);
 	depthTex = api->createTexture(800, 600, DEPTH_STENCIL, D24_S8);
 	//Compile and create vertex / pixel shader
-	sp = api->createShaderProgram(L"DX_VS.fx", L"DX_PS.fx");
-	sp2 = api->createShaderProgram(L"DX_VS.fx", L"DX_PS2.fx");
+	sp = api->createShaderProgram(L"VS", L"PS");
+	sp2 = api->createShaderProgram(L"VS", L"PS2");
 	//Define input layout
 	LAYOUT_DESC lDesc;
 	lDesc.addToDesc(POSITION, RGB32_FLOAT, 0, 3);

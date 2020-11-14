@@ -222,13 +222,42 @@ CTexture* COGLGraphicsAPI::createTexture(int width,
 	return Tex;
 }
 
+std::wstring getFileNameOGL(std::wstring vsfile)
+{
+	size_t realPos = 0;
+	size_t posInvSlash = vsfile.rfind('\\');
+	size_t posSlash = vsfile.rfind('/');
+
+	if (posInvSlash == std::wstring::npos)
+	{//No encontramos diagonales invertidas
+		if (!posSlash == std::wstring::npos)
+		{//Encontramos diagonales normales
+			realPos = posSlash;
+		}
+	}
+	else
+	{//Encontramos diagonales invertidas
+		realPos = posInvSlash;
+		if (!posSlash == std::wstring::npos)
+		{
+			if (posSlash > realPos)
+			{
+				posSlash = realPos;
+			}
+		}
+	}
+
+	return vsfile.substr(realPos, vsfile.length() - realPos);
+}
+
 CShaderProgram* COGLGraphicsAPI::createShaderProgram(std::wstring vsfile,
 	std::wstring psfile)
 {
+	std::wstring realFileName = getFileNameOGL(vsfile) + L"_OGL.glsl";
 	std::string source;
 	int result;
 	char log[512];
-	readShaderFile(vsfile, source);
+	readShaderFile(realFileName, source);
 	const char* vs_source = source.c_str();
 
 	COGLShaderProgram* ShaderProgram = new COGLShaderProgram();
@@ -250,7 +279,8 @@ CShaderProgram* COGLGraphicsAPI::createShaderProgram(std::wstring vsfile,
 		return nullptr;
 	}
 
-	readShaderFile(psfile, source);
+	realFileName = getFileNameOGL(psfile) + L"_OGL.glsl";
+	readShaderFile(realFileName, source);
 	const char* ps_source = source.c_str();
 
 	PS->m_PS = glCreateShader(GL_FRAGMENT_SHADER);

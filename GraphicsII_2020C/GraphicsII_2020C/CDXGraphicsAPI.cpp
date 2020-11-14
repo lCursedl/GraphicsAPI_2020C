@@ -272,9 +272,39 @@ CTexture* CDXGraphicsAPI::createTexture(int width,
 	}
 }
 
+std::wstring getFileName(std::wstring vsfile)
+{
+	size_t realPos = 0;
+	size_t posInvSlash = vsfile.rfind('\\');
+	size_t posSlash = vsfile.rfind('/');
+
+	if (posInvSlash == std::wstring::npos)
+	{//No encontramos diagonales invertidas
+		if (!posSlash == std::wstring::npos)
+		{//Encontramos diagonales normales
+			realPos = posSlash;
+		}
+	}
+	else
+	{//Encontramos diagonales invertidas
+		realPos = posInvSlash;
+		if (!posSlash == std::wstring::npos)
+		{
+			if (posSlash > realPos)
+			{
+				posSlash = realPos;
+			}
+		}
+	}
+
+	return vsfile.substr(realPos, vsfile.length() - realPos);
+}
+
 CShaderProgram* CDXGraphicsAPI::createShaderProgram(std::wstring vsfile,
 	std::wstring psfile)
 {
+	std::wstring realFileName = getFileName(vsfile) + L"_DX.hlsl";
+
 	CDXShaderProgram* ShaderProgram = new CDXShaderProgram();
 	CDXVertexShader* VS = 
 		dynamic_cast<CDXVertexShader*>(ShaderProgram->getVertexShader());
@@ -282,7 +312,7 @@ CShaderProgram* CDXGraphicsAPI::createShaderProgram(std::wstring vsfile,
 		dynamic_cast<CDXPixelShader*>(ShaderProgram->getPixelShader());
 	
 	//Compile vertex shader file and check for errors
-	if (FAILED(compileShaderFromFile(vsfile,
+	if (FAILED(compileShaderFromFile(realFileName,
 		"vs_4_0",
 		&VS->m_Blob)))
 	{
@@ -301,8 +331,10 @@ CShaderProgram* CDXGraphicsAPI::createShaderProgram(std::wstring vsfile,
 		return nullptr;
 	}
 
+	realFileName = getFileName(psfile) + L"_DX.hlsl";
+
 	//Compile pixel shader file and check for errors
-	if (FAILED(compileShaderFromFile(psfile, "ps_4_0", &PS->m_Blob)))
+	if (FAILED(compileShaderFromFile(realFileName, "ps_4_0", &PS->m_Blob)))
 	{
 		delete ShaderProgram;
 		return nullptr;
@@ -457,12 +489,7 @@ CSamplerState* CDXGraphicsAPI::createSamplerState(FILTER_LEVEL mag,
 	desc.MinLOD = 0;
 	desc.MaxLOD = D3D11_FLOAT32_MAX;
 	
-	if (anisotropic > D3D11_MAX_MAXANISOTROPY)
-	{
-		anisotropic = D3D11_MAX_MAXANISOTROPY;
-	}
-
-	desc.MaxAnisotropy = anisotropic;
+	desc.MaxAnisotropy = std::clamp<int>(anisotropic, 0, D3D11_MAX_MAXANISOTROPY);
 
 	if (mag == FILTER_POINT)
 	{
