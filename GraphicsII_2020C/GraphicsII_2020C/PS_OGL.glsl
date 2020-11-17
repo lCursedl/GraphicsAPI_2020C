@@ -16,7 +16,9 @@ layout(std140, binding = 1) uniform cbView
 in vec2 Texcoord;
 in vec4 psPos;
 
+layout(binding = 0) uniform sampler2D diffuse;
+
 void main()
 {
-	FragColor = Color;
+	FragColor = texture(diffuse, Texcoord);
 }

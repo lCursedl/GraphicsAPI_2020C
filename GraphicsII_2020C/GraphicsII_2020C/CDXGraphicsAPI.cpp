@@ -189,15 +189,15 @@ CTexture* CDXGraphicsAPI::createTexture(int width,
 		Desc.SampleDesc.Quality = 0;
 		Desc.Usage = D3D11_USAGE_DEFAULT;
 
-		if (binding & SHADER_RESOURCE)
+		if (binding & TEXTURE_BINDINGS::SHADER_RESOURCE)
 		{
 			Desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
 		}
-		if (binding & RENDER_TARGET)
+		if (binding & TEXTURE_BINDINGS::RENDER_TARGET)
 		{
 			Desc.BindFlags |= D3D11_BIND_RENDER_TARGET;
 		}
-		if (binding & DEPTH_STENCIL)
+		if (binding & TEXTURE_BINDINGS::DEPTH_STENCIL)
 		{
 			Desc.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
 		}
@@ -211,7 +211,7 @@ CTexture* CDXGraphicsAPI::createTexture(int width,
 			return nullptr;
 		}
 
-		if (binding & SHADER_RESOURCE)
+		if (binding & TEXTURE_BINDINGS::SHADER_RESOURCE)
 		{
 			D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
 			ZeroMemory(&viewDesc, sizeof(viewDesc));
@@ -229,7 +229,7 @@ CTexture* CDXGraphicsAPI::createTexture(int width,
 				return nullptr;
 			}
 		}
-		if (binding & RENDER_TARGET)
+		if (binding & TEXTURE_BINDINGS::RENDER_TARGET)
 		{
 			D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
 			ZeroMemory(&rtvDesc, sizeof(rtvDesc));
@@ -246,7 +246,7 @@ CTexture* CDXGraphicsAPI::createTexture(int width,
 				return nullptr;
 			}
 		}
-		if (binding & DEPTH_STENCIL)
+		if (binding & TEXTURE_BINDINGS::DEPTH_STENCIL)
 		{
 			D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
 			ZeroMemory(&descDSV, sizeof(descDSV));
@@ -300,56 +300,9 @@ std::wstring getFileName(std::wstring vsfile)
 	return vsfile.substr(realPos, vsfile.length() - realPos);
 }
 
-CShaderProgram* CDXGraphicsAPI::createShaderProgram(std::wstring vsfile,
-	std::wstring psfile)
+CShaderProgram* CDXGraphicsAPI::createShaderProgram()
 {
-	std::wstring realFileName = getFileName(vsfile) + L"_DX.hlsl";
-
 	CDXShaderProgram* ShaderProgram = new CDXShaderProgram();
-	CDXVertexShader* VS = 
-		dynamic_cast<CDXVertexShader*>(ShaderProgram->getVertexShader());
-	CDXPixelShader* PS =
-		dynamic_cast<CDXPixelShader*>(ShaderProgram->getPixelShader());
-	
-	//Compile vertex shader file and check for errors
-	if (FAILED(compileShaderFromFile(realFileName,
-		"vs_4_0",
-		&VS->m_Blob)))
-	{
-		delete ShaderProgram;
-		return nullptr;
-	}
-
-	//Create vertex shader from compilation and check errors
-	if (FAILED(m_Device->CreateVertexShader(
-							VS->m_Blob->GetBufferPointer(),
-							VS->m_Blob->GetBufferSize(),
-							NULL,
-							&VS->m_VS)))
-	{
-		delete ShaderProgram;
-		return nullptr;
-	}
-
-	realFileName = getFileName(psfile) + L"_DX.hlsl";
-
-	//Compile pixel shader file and check for errors
-	if (FAILED(compileShaderFromFile(realFileName, "ps_4_0", &PS->m_Blob)))
-	{
-		delete ShaderProgram;
-		return nullptr;
-	}
-
-	//Create pixel shader from compilation and check for errors
-	if (FAILED(m_Device->CreatePixelShader(
-						PS->m_Blob->GetBufferPointer(),
-						PS->m_Blob->GetBufferSize(),
-						NULL,
-						&PS->m_PS)))
-	{
-		delete ShaderProgram;
-		return nullptr;
-	}
 
 	return ShaderProgram;
 }
@@ -552,6 +505,60 @@ CSamplerState* CDXGraphicsAPI::createSamplerState(FILTER_LEVEL mag,
 	return sampler;
 }
 
+CVertexShader* CDXGraphicsAPI::createVertexShader(std::wstring file)
+{
+	std::wstring realFileName = getFileName(file) + L"_DX.hlsl";
+	CDXVertexShader* vs = new CDXVertexShader();
+
+	if (FAILED(compileShaderFromFile(realFileName,
+		"vs_4_0",
+		&vs->m_Blob)))
+	{
+		delete vs;
+		return nullptr;
+	}
+
+	//Create vertex shader from compilation and check errors
+	if (FAILED(m_Device->CreateVertexShader(
+		vs->m_Blob->GetBufferPointer(),
+		vs->m_Blob->GetBufferSize(),
+		NULL,
+		&vs->m_VS)))
+	{
+		delete vs;
+		return nullptr;
+	}
+
+	return vs;
+}
+
+CPixelShader* CDXGraphicsAPI::createPixelShader(std::wstring file)
+{
+	std::wstring realFileName = getFileName(file) + L"_DX.hlsl";
+	CDXPixelShader* ps = new CDXPixelShader();
+
+	if (FAILED(compileShaderFromFile(realFileName,
+		"ps_4_0",
+		&ps->m_Blob)))
+	{
+		delete ps;
+		return nullptr;
+	}
+
+	//Create vertex shader from compilation and check errors
+	if (FAILED(m_Device->CreatePixelShader(
+		ps->m_Blob->GetBufferPointer(),
+		ps->m_Blob->GetBufferSize(),
+		NULL,
+		&ps->m_PS)))
+	{
+		delete ps;
+		return nullptr;
+	}
+
+	return ps;
+}
+
 void CDXGraphicsAPI::setBackBuffer()
 {
 
@@ -719,7 +726,9 @@ void CDXGraphicsAPI::setIndexBuffer(CBuffer* buffer)
 	}
 }
 
-void CDXGraphicsAPI::setSamplerState(CTexture* texture, CSamplerState* sampler)
+void CDXGraphicsAPI::setSamplerState(unsigned int slot,
+	CTexture* texture,
+	CSamplerState* sampler)
 {
 	if (!sampler)
 	{
@@ -734,8 +743,7 @@ void CDXGraphicsAPI::setSamplerState(CTexture* texture, CSamplerState* sampler)
 		OutputDebugStringA("Sampler missing initialization.");
 		return;
 	}
-
-	m_DeviceContext->PSSetSamplers(0, 1, &samp->m_Sampler);
+	m_DeviceContext->PSSetSamplers(slot, 1, &samp->m_Sampler);
 }
 
 void CDXGraphicsAPI::setConstantBuffer(unsigned int slot,
@@ -788,7 +796,7 @@ void CDXGraphicsAPI::clearDepthStencil(CTexture* ds)
 {
 	if (!ds)
 	{
-		OutputDebugStringA("Invalid Depth Stencil received.");
+		OutputDebugStringA("Depth Stencil received was nullptr.");
 		return;
 	}
 	CDXTexture* depth = dynamic_cast<CDXTexture*>(ds);
@@ -801,6 +809,22 @@ void CDXGraphicsAPI::clearDepthStencil(CTexture* ds)
 		D3D11_CLEAR_DEPTH,
 		1.0f,
 		0);
+}
+
+void CDXGraphicsAPI::setTexture(unsigned int slot, CTexture* texture)
+{
+	CDXTexture* tex = dynamic_cast<CDXTexture*>(texture);
+	if (!tex)
+	{
+		OutputDebugStringA("Texture received was nullptr.");
+		return;
+	}
+	if (!tex->m_pTexture || !tex->m_pSRV)
+	{
+		OutputDebugStringA("Uninitialized texture received.");
+		return;
+	}
+	m_DeviceContext->PSSetShaderResources(slot, 1, &tex->m_pSRV);
 }
 
 void CDXGraphicsAPI::swapBuffer()

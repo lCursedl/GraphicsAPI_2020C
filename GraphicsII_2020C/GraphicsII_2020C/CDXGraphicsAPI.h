@@ -18,8 +18,7 @@ public:
         TEXTURE_BINDINGS binding,
         FORMATS format)                                       override;
 
-    CShaderProgram* createShaderProgram(std::wstring vsfile,
-        std::wstring psfile)                                  override;
+    CShaderProgram* createShaderProgram()                     override;
 
     CBuffer* createBuffer(const void* data,
         unsigned int size,
@@ -32,6 +31,8 @@ public:
         FILTER_LEVEL mip,
         unsigned int anisotropic,
         WRAPPING wrapMode)                                    override;
+    CVertexShader* createVertexShader(std::wstring file)      override;
+    CPixelShader* createPixelShader(std::wstring file)        override;
 
     //DEVICE CONTEXT
 
@@ -45,13 +46,15 @@ public:
     void updateBuffer(CBuffer* buffer, const void* data)      override;
     void setVertexBuffer(CBuffer* buffer, unsigned int size)  override;
     void setIndexBuffer(CBuffer* buffer)                      override;
-    void setSamplerState(CTexture* texture,
+    void setSamplerState(unsigned int slot,
+        CTexture* texture,
         CSamplerState* sampler)                               override;
     void setConstantBuffer(unsigned int slot,
         CBuffer* buffer,
         SHADER_TYPE shaderType)                               override;
     void clearRenderTarget(CTexture* rt, COLOR color)         override;
     void clearDepthStencil(CTexture* ds)                      override;
+    void setTexture(unsigned int slot, CTexture* texture)     override;
 
     //SWAPCHAIN
 

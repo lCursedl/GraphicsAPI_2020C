@@ -45,7 +45,9 @@ public:
 	*/
 	virtual void shutdown() = 0;
 
-	//DEVICE
+	/***********************************************************************************/
+	/*----------------------------------DEVICE-----------------------------------------*/
+	/***********************************************************************************/
 	
 	/** \fn CTexture* createTexture(int width, int height,
 	*								TEXTURE_BINDINGS binding, FORMATS format)
@@ -61,16 +63,11 @@ public:
 		TEXTURE_BINDINGS binding,
 		FORMATS format) = 0;
 
-	/**	\fn CShaderProgram* createShaderProgram(std::wstring vsfile, std::wstring psfile)
-	*	\brief Compiles and creates a vertex and pixel shader, then stores them in a
-	*			shader program and returns it.
-	*	@param[in] vsfile File name of the desired vertex shader to load.
-	*	@param[in] psfile File name of the desired pixel shader to load.
+	/**	\fn CShaderProgram* createShaderProgram()
+	*	\brief Creates a shader program and returns it.
 	*	\return CShaderProgram pointer of the corresponding API.
-	*	\warning Path is relative to solution project.
 	*/
-	virtual CShaderProgram* createShaderProgram(std::wstring vsfile,
-		std::wstring psfile) = 0;
+	virtual CShaderProgram* createShaderProgram() = 0;
 
 	/** \fn CBuffer* createBuffer(const void * data, unsigned int size, BUFFER_TYPE type)
 	*	\brief Creates a buffer with the received parameters and optionally data.
@@ -110,7 +107,19 @@ public:
 		unsigned int anisotropic,
 		WRAPPING wrapMode) = 0;
 
-	//DEVICE CONTEXT
+	/**
+	* 
+	*/
+	virtual CVertexShader* createVertexShader(std::wstring file) = 0;
+
+	/**
+	* 
+	*/
+	virtual CPixelShader* createPixelShader(std::wstring file) = 0;
+
+	/***********************************************************************************/
+	/*----------------------------DEVICE CONTEXT---------------------------------------*/
+	/***********************************************************************************/
 
 	/**	\fn void setBackBuffer()
 	*	\brief Sets the default render target view and depth stencil view as current.
@@ -181,11 +190,14 @@ public:
 	virtual void setIndexBuffer(CBuffer* buffer) = 0;
 
 	/** void setSamplerState(CTexture* texture, CSamplerState* sampler)
-	*	\brief Sets the sampler state and binds it to a texture.
-	*	@param[in] texture Texture to which bind sampler to.
+	*	\brief Sets the sampler state and binds it to a texture and slot.
+	*	@param[in] slot	   Slot of the sampler in the shader.
+	*	@param[in] texture Texture to which bind the sampler to.
 	*	@param[in] sampler Sampler State to bind.
 	*/
-	virtual void setSamplerState(CTexture* texture, CSamplerState* sampler) = 0;
+	virtual void setSamplerState(unsigned int slot,
+		CTexture* texture,
+		CSamplerState* sampler) = 0;
 
 	/** \fn void setConstantBuffer(unsigned int slot, CBuffer* buffer,
 	*							SHADER_TYPE shaderType)
@@ -206,10 +218,17 @@ public:
 	*/
 	virtual void clearRenderTarget(CTexture* rt, COLOR color) = 0;
 
-	/** \fn clearDepthStencil(CTexture* ds)
+	/** \fn void clearDepthStencil(CTexture* ds)
 	*	\brief Clears the specified depth stencil.
 	*/
 	virtual void clearDepthStencil(CTexture* ds) = 0;
+
+	/**	\fn void setTexture(unsigned int slot, CTexture* texture)
+	*	\brief Sets the texture for use in the pixel shader.
+	*	@param[in] slot Index of the texture in the shader.
+	*	@param[in] texture Texture to set.
+	*/
+	virtual void setTexture(unsigned int slot, CTexture* texture) = 0;
 
 	//SWAPCHAIN
 

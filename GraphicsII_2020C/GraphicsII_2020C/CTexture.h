@@ -4,7 +4,7 @@
 /**	\enum TEXTURE_BINDINGS
 *	\brief Enum which contains definitions for different texture bindings.
 */
-enum TEXTURE_BINDINGS
+enum class TEXTURE_BINDINGS
 {
 	SHADER_RESOURCE = 0x01,
 	RENDER_TARGET = 0x02,
@@ -22,3 +22,9 @@ public:
 	CTexture();
 	virtual ~CTexture();
 };
+
+TEXTURE_BINDINGS operator | (TEXTURE_BINDINGS a, TEXTURE_BINDINGS b);
+
+bool operator & (TEXTURE_BINDINGS a, TEXTURE_BINDINGS b);
+
+TEXTURE_BINDINGS operator |= (TEXTURE_BINDINGS& a, TEXTURE_BINDINGS b);

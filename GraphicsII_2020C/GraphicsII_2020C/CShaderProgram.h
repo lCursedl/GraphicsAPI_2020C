@@ -15,17 +15,7 @@ public:
 	*	If m_pVertexShader or m_pPixelShader was used, release memory 
 		before deleting object.
 	*/
-	virtual ~CShaderProgram()
-	{
-		if (m_pVertexShader)
-		{
-			delete m_pVertexShader;
-		}
-		if (m_pPixelShader)
-		{
-			delete m_pPixelShader;
-		}
-	}
+	virtual ~CShaderProgram(){}
 
 	/**	\fn CVertexShader* getVerteShader()
 	*	\brief Obtains the pointer to the VertexShader member
@@ -62,6 +52,11 @@ public:
 	{
 		m_pPixelShader = pixelShader;
 	}
+
+	/**	\fn virtual void linkProgram()
+	*	\brief Links the attached shaders to the program
+	*/
+	virtual void linkProgram();
 
 protected:
 	CVertexShader* m_pVertexShader = nullptr;	/**< CVertexShader pointer */

@@ -35,6 +35,10 @@ CShaderProgram* sp2 = nullptr;
 CInputLayout* layout = nullptr;
 CTexture* rtv = nullptr;
 CTexture* depthTex = nullptr;
+CVertexShader* defaultVS = nullptr;
+CPixelShader* redPS = nullptr;
+CPixelShader* posPS = nullptr;
+CSamplerState* sampler = nullptr;
 CCamera Cam;
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow)
@@ -71,7 +75,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 
 	ShowWindow(hwnd, nCmdShow);
 
-	CGraphicsAPI* graphicsAPI = new COGLGraphicsAPI();
+	CGraphicsAPI* graphicsAPI = new CDXGraphicsAPI();
 	graphicsAPI->init(hwnd);
 	Load(graphicsAPI);
 
@@ -151,16 +155,40 @@ void Clear()
 	delete depthTex;
 	delete sp;
 	delete sp2;
+	delete defaultVS;
+	delete redPS;
+	delete posPS;
 }
 
 void Load(CGraphicsAPI* api)
 {
 	//Create rt for offscreen rendering
-	rtv = api->createTexture(800, 600, RENDER_TARGET, RGBA16_FLOAT);
-	depthTex = api->createTexture(800, 600, DEPTH_STENCIL, D24_S8);
+	rtv = api->createTexture(800, 600,
+		TEXTURE_BINDINGS::RENDER_TARGET | TEXTURE_BINDINGS::SHADER_RESOURCE,
+		RGBA16_FLOAT);
+	depthTex = api->createTexture(800, 600, TEXTURE_BINDINGS::DEPTH_STENCIL, D24_S8);
 	//Compile and create vertex / pixel shader
-	sp = api->createShaderProgram(L"VS", L"PS");
-	sp2 = api->createShaderProgram(L"VS", L"PS2");
+	defaultVS = api->createVertexShader(L"VS");
+	redPS = api->createPixelShader(L"PS");
+	posPS = api->createPixelShader(L"PS2");
+	//Create shader program
+	sp = api->createShaderProgram();
+	sp2 = api->createShaderProgram();
+	//Attach shaders to programs
+	sp->setVertexShader(defaultVS);
+	sp->setPixelShader(redPS);
+
+	sp2->setVertexShader(defaultVS);
+	sp2->setPixelShader(posPS);
+	//Link shader programs
+	sp->linkProgram();
+	sp2->linkProgram();
+	//Create sampler state
+	sampler = api->createSamplerState(FILTER_LINEAR,
+		FILTER_LINEAR,
+		FILTER_LINEAR,
+		0,
+		WRAP);
 	//Define input layout
 	LAYOUT_DESC lDesc;
 	lDesc.addToDesc(POSITION, RGB32_FLOAT, 0, 3);
@@ -169,35 +197,35 @@ void Load(CGraphicsAPI* api)
 	layout = api->createInputLayout(sp, lDesc);
 	//Define vertex buffer
 	std::vector<Vertex>vertices;
-	vertices.push_back({ glm::vec3(-1.0f, 1.0f, -1.0f),	glm::vec2(0.0f, 0.0f) });
-	vertices.push_back({ glm::vec3(1.0f, 1.0f, -1.0f),	glm::vec2(1.0f, 0.0f) });
-	vertices.push_back({ glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(1.0f, 1.0f) });
-	vertices.push_back({ glm::vec3(-1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 1.0f) });
-
-	vertices.push_back({ glm::vec3(-1.0f, -1.0f, -1.0f),glm::vec2(0.0f, 0.0f) });
-	vertices.push_back({ glm::vec3(1.0f, -1.0f, -1.0f),	glm::vec2(1.0f, 0.0f) });
-	vertices.push_back({ glm::vec3(1.0f, -1.0f, 1.0f),	glm::vec2(1.0f, 1.0f) });
-	vertices.push_back({ glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 1.0f) });
-
-	vertices.push_back({ glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 0.0f) });
-	vertices.push_back({ glm::vec3(-1.0f, -1.0f, -1.0f),glm::vec2(1.0f, 0.0f) });
-	vertices.push_back({ glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec2(1.0f, 1.0f) });
-	vertices.push_back({ glm::vec3(-1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 1.0f) });
-
-	vertices.push_back({ glm::vec3(1.0f, -1.0f, 1.0f),	glm::vec2(0.0f, 0.0f) });
-	vertices.push_back({ glm::vec3(1.0f, -1.0f, -1.0f), glm::vec2(1.0f, 0.0f) });
+	vertices.push_back({ glm::vec3(-1.0f, 1.0f, -1.0f),	glm::vec2(0.0f, 1.0f) });
 	vertices.push_back({ glm::vec3(1.0f, 1.0f, -1.0f),	glm::vec2(1.0f, 1.0f) });
-	vertices.push_back({ glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 1.0f) });
+	vertices.push_back({ glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(1.0f, 0.0f) });
+	vertices.push_back({ glm::vec3(-1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 0.0f) });
 
-	vertices.push_back({ glm::vec3(-1.0f, -1.0f, -1.0f),glm::vec2(0.0f, 0.0f) });
-	vertices.push_back({ glm::vec3(1.0f, -1.0f, -1.0f), glm::vec2(1.0f, 0.0f) });
-	vertices.push_back({ glm::vec3(1.0f, 1.0f, -1.0f),	glm::vec2(1.0f, 1.0f) });
-	vertices.push_back({ glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec2(0.0f, 1.0f) });
-
-	vertices.push_back({ glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 0.0f) });
+	vertices.push_back({ glm::vec3(-1.0f, -1.0f, -1.0f),glm::vec2(0.0f, 1.0f) });
+	vertices.push_back({ glm::vec3(1.0f, -1.0f, -1.0f),	glm::vec2(1.0f, 1.0f) });
 	vertices.push_back({ glm::vec3(1.0f, -1.0f, 1.0f),	glm::vec2(1.0f, 0.0f) });
-	vertices.push_back({ glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(1.0f, 1.0f) });
-	vertices.push_back({ glm::vec3(-1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 1.0f) });
+	vertices.push_back({ glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 0.0f) });
+
+	vertices.push_back({ glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 1.0f) });
+	vertices.push_back({ glm::vec3(-1.0f, -1.0f, -1.0f),glm::vec2(1.0f, 1.0f) });
+	vertices.push_back({ glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec2(1.0f, 0.0f) });
+	vertices.push_back({ glm::vec3(-1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 0.0f) });
+
+	vertices.push_back({ glm::vec3(1.0f, -1.0f, 1.0f),	glm::vec2(0.0f, 1.0f) });
+	vertices.push_back({ glm::vec3(1.0f, -1.0f, -1.0f), glm::vec2(1.0f, 1.0f) });
+	vertices.push_back({ glm::vec3(1.0f, 1.0f, -1.0f),	glm::vec2(1.0f, 0.0f) });
+	vertices.push_back({ glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 0.0f) });
+
+	vertices.push_back({ glm::vec3(-1.0f, -1.0f, -1.0f),glm::vec2(0.0f, 1.0f) });
+	vertices.push_back({ glm::vec3(1.0f, -1.0f, -1.0f), glm::vec2(1.0f, 1.0f) });
+	vertices.push_back({ glm::vec3(1.0f, 1.0f, -1.0f),	glm::vec2(1.0f, 0.0f) });
+	vertices.push_back({ glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec2(0.0f, 0.0f) });
+
+	vertices.push_back({ glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 1.0f) });
+	vertices.push_back({ glm::vec3(1.0f, -1.0f, 1.0f),	glm::vec2(1.0f, 1.0f) });
+	vertices.push_back({ glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(1.0f, 0.0f) });
+	vertices.push_back({ glm::vec3(-1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 0.0f) });
 	//Define index buffer
 	std::vector<unsigned int>indices;
 	indices.push_back(3); indices.push_back(1); indices.push_back(0);
@@ -265,7 +293,9 @@ void Render(CGraphicsAPI* api)
 	api->drawIndexed(36);
 
 	api->setBackBuffer();
-	api->clearBackBuffer({ 0.0f, 0.125f, 0.3f, 1.0f });	
+	api->clearBackBuffer({ 0.0f, 0.125f, 0.3f, 1.0f });
+	api->setSamplerState(0, rtv, sampler);
+	api->setTexture(0, rtv);
 	api->setShaders(sp);
 	api->drawIndexed(36);
 

@@ -25,4 +25,5 @@ private:
     unsigned int m_PS;          /**< unsigned int for OpenGL pixel shader index */
 
     friend class COGLGraphicsAPI;
+    friend class COGLShaderProgram;
 };

@@ -180,7 +180,7 @@ CTexture* COGLGraphicsAPI::createTexture(int width,
 {
 	COGLTexture* Tex = new COGLTexture();
 	
-	if (binding == DEPTH_STENCIL)
+	if (binding & TEXTURE_BINDINGS::DEPTH_STENCIL)
 	{
 		//Create RenderBufferObject for depth and stencil
 		glGenRenderbuffers(1, &Tex->m_iTexture);
@@ -202,7 +202,7 @@ CTexture* COGLGraphicsAPI::createTexture(int width,
 			m_Formats[format].second,
 			GL_UNSIGNED_BYTE,
 			NULL);
-		if (binding & RENDER_TARGET)
+		if (binding & TEXTURE_BINDINGS::RENDER_TARGET)
 		{
 			glGenFramebuffers(1, &Tex->m_iFramebuffer);
 			glBindFramebuffer(GL_FRAMEBUFFER, Tex->m_iFramebuffer);
@@ -250,66 +250,10 @@ std::wstring getFileNameOGL(std::wstring vsfile)
 	return vsfile.substr(realPos, vsfile.length() - realPos);
 }
 
-CShaderProgram* COGLGraphicsAPI::createShaderProgram(std::wstring vsfile,
-	std::wstring psfile)
+CShaderProgram* COGLGraphicsAPI::createShaderProgram()
 {
-	std::wstring realFileName = getFileNameOGL(vsfile) + L"_OGL.glsl";
-	std::string source;
-	int result;
-	char log[512];
-	readShaderFile(realFileName, source);
-	const char* vs_source = source.c_str();
-
 	COGLShaderProgram* ShaderProgram = new COGLShaderProgram();
-	COGLVertexShader* VS =
-		dynamic_cast<COGLVertexShader*>(ShaderProgram->getVertexShader());
-	COGLPixelShader* PS = 
-		dynamic_cast<COGLPixelShader*>(ShaderProgram->getPixelShader());
-
-	VS->m_VertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(VS->m_VertexShader, 1, &vs_source, NULL);
-	glCompileShader(VS->m_VertexShader);
-
-	glGetShaderiv(VS->m_VertexShader, GL_COMPILE_STATUS, &result);
-	if (!result)
-	{
-		glGetShaderInfoLog(VS->m_VertexShader, 512, NULL, log);
-		OutputDebugStringA(log);
-		delete ShaderProgram;
-		return nullptr;
-	}
-
-	realFileName = getFileNameOGL(psfile) + L"_OGL.glsl";
-	readShaderFile(realFileName, source);
-	const char* ps_source = source.c_str();
-
-	PS->m_PS = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(PS->m_PS, 1, &ps_source, NULL);
-	glCompileShader(PS->m_PS);
-
-	glGetShaderiv(PS->m_PS, GL_COMPILE_STATUS, &result);
-	if (!result)
-	{
-		glGetShaderInfoLog(PS->m_PS, 512, NULL, log);
-		OutputDebugStringA(log);
-		delete ShaderProgram;
-		return nullptr;
-	}
-
 	ShaderProgram->m_Program = glCreateProgram();
-	glAttachShader(ShaderProgram->m_Program, VS->m_VertexShader);
-	glAttachShader(ShaderProgram->m_Program, PS->m_PS);
-	glLinkProgram(ShaderProgram->m_Program);
-
-	glGetProgramiv(ShaderProgram->m_Program, GL_LINK_STATUS, &result);
-	if (!result)
-	{
-		glGetProgramInfoLog(ShaderProgram->m_Program, 512, NULL, log);
-		OutputDebugStringA(log);
-		delete ShaderProgram;
-		return nullptr;
-	}
-
 	return ShaderProgram;
 }
 
@@ -453,7 +397,9 @@ void COGLGraphicsAPI::setIndexBuffer(CBuffer* buffer)
 	}
 }
 
-void COGLGraphicsAPI::setSamplerState(CTexture* texture, CSamplerState* sampler)
+void COGLGraphicsAPI::setSamplerState(unsigned int slot,
+	CTexture* texture,
+	CSamplerState* sampler)
 {
 	if (!texture)
 	{
@@ -540,6 +486,23 @@ void COGLGraphicsAPI::clearDepthStencil(CTexture* ds)
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, depth->m_iFramebuffer);
 	glClear(GL_DEPTH_BUFFER_BIT);
+}
+
+void COGLGraphicsAPI::setTexture(unsigned int slot, CTexture* texture)
+{
+	COGLTexture* tex = dynamic_cast<COGLTexture*>(texture);
+	if (!tex)
+	{
+		OutputDebugStringA("Texture received was nullptr.");
+		return;
+	}
+	if (tex->m_iTexture == 0)
+	{
+		OutputDebugStringA("Uninitialized texture received.");
+		return;
+	}
+	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindTexture(GL_TEXTURE_2D, tex->m_iTexture);
 }
 
 void COGLGraphicsAPI::swapBuffer()
@@ -693,4 +656,54 @@ CSamplerState* COGLGraphicsAPI::createSamplerState(FILTER_LEVEL mag,
 	glSamplerParameteri(sampler->m_Sampler, GL_TEXTURE_MIN_FILTER, minmipLevel);
 
 	return sampler;
+}
+
+CVertexShader* COGLGraphicsAPI::createVertexShader(std::wstring file)
+{
+	std::wstring realFileName = getFileNameOGL(file) + L"_OGL.glsl";
+	std::string source;
+	int result;
+	char log[512];
+	readShaderFile(realFileName, source);
+	const char* vs_Source = source.c_str();
+
+	COGLVertexShader* vs = new COGLVertexShader();
+	vs->m_VertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vs->m_VertexShader, 1, &vs_Source, 0);
+	glCompileShader(vs->m_VertexShader);
+
+	glGetShaderiv(vs->m_VertexShader, GL_COMPILE_STATUS, &result);
+	if (!result)
+	{
+		glGetShaderInfoLog(vs->m_VertexShader, 512, 0, log);
+		OutputDebugStringA(log);
+		delete vs;
+		return nullptr;
+	}
+	return vs;
+}
+
+CPixelShader* COGLGraphicsAPI::createPixelShader(std::wstring file)
+{
+	std::wstring realFileName = getFileNameOGL(file) + L"_OGL.glsl";
+	std::string source;
+	int result;
+	char log[512];
+	readShaderFile(realFileName, source);
+	const char* ps_Source = source.c_str();
+
+	COGLPixelShader* ps = new COGLPixelShader();
+	ps->m_PS = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(ps->m_PS, 1, &ps_Source, 0);
+	glCompileShader(ps->m_PS);
+
+	glGetShaderiv(ps->m_PS, GL_COMPILE_STATUS, &result);
+	if (!result)
+	{
+		glGetShaderInfoLog(ps->m_PS, 512, 0, log);
+		OutputDebugStringA(log);
+		delete ps;
+		return nullptr;
+	}
+	return ps;
 }

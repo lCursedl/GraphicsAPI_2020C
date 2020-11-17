@@ -24,4 +24,5 @@ private:
     unsigned int m_VertexShader;    /**< unsigned int for OpenGL vertex shader index. */
 
     friend class COGLGraphicsAPI;
+    friend class COGLShaderProgram;
 };

@@ -13,17 +13,20 @@ class COGLShaderProgram :
 public:
     /** \fn COGLShaderProgram()
     *   \brief Class constructor.
-    *   Initializes m_pVertexShader as an COGLVertexShader 
-    *   & m_pPixelShader as COGLPixelShader
     */
     COGLShaderProgram();
 
     /** \fn ~COGLShaderProgram()
     *   \brief Class destructor.
-    *   If m_pVertexShader or m_pPixelSHader were used, release memory before deleting
-    *   object.
+    *   If m_Program was used, release memory before deleting object.
     */
     ~COGLShaderProgram();
+
+    void setVertexShader(CVertexShader* vertexShader)               override;
+
+    void setPixelShader(CPixelShader* pixelShader)                  override;
+
+    void linkProgram()                                              override;
 
 private:
     unsigned int m_Program;         /**< unsigned int for OpenGL shader program index. */
