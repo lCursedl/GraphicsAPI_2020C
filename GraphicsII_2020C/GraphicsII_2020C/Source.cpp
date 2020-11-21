@@ -1,6 +1,7 @@
 #include "CDXGraphicsAPI.h"
 #include "COGLGraphicsAPI.h"
 #include "CCamera.h"
+#include "CModel.h"
 
 struct Vertex
 {
@@ -26,8 +27,6 @@ void Render(CGraphicsAPI* api);
 void Clear();
 void Update(CGraphicsAPI* api);
 
-CBuffer* vb = nullptr;
-CBuffer* ib = nullptr;
 CBuffer* cbMatrices = nullptr;
 CBuffer* cbView = nullptr;
 CShaderProgram* sp = nullptr;
@@ -39,6 +38,7 @@ CVertexShader* defaultVS = nullptr;
 CPixelShader* redPS = nullptr;
 CPixelShader* posPS = nullptr;
 CSamplerState* sampler = nullptr;
+CModel* myModel = nullptr;
 CCamera Cam;
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow)
@@ -75,7 +75,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 
 	ShowWindow(hwnd, nCmdShow);
 
-	CGraphicsAPI* graphicsAPI = new CDXGraphicsAPI();
+	CGraphicsAPI* graphicsAPI = new COGLGraphicsAPI();
 	graphicsAPI->init(hwnd);
 	Load(graphicsAPI);
 
@@ -146,8 +146,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 void Clear()
 {
-	delete vb;
-	delete ib;
 	delete cbMatrices;
 	delete cbView;
 	delete layout;
@@ -158,6 +156,7 @@ void Clear()
 	delete defaultVS;
 	delete redPS;
 	delete posPS;
+	delete myModel;
 }
 
 void Load(CGraphicsAPI* api)
@@ -193,62 +192,11 @@ void Load(CGraphicsAPI* api)
 	LAYOUT_DESC lDesc;
 	lDesc.addToDesc(POSITION, RGB32_FLOAT, 0, 3);
 	lDesc.addToDesc(TEXCOORD, RG32_FLOAT, 12, 2);
+	lDesc.addToDesc(NORMAL, RGB32_FLOAT, 20, 3);
+	lDesc.addToDesc(TANGENT, RGB32_FLOAT, 36, 3);
+	lDesc.addToDesc(BINORMAL, RGB32_FLOAT, 48, 3);
 	//Create input layout
 	layout = api->createInputLayout(sp, lDesc);
-	//Define vertex buffer
-	std::vector<Vertex>vertices;
-	vertices.push_back({ glm::vec3(-1.0f, 1.0f, -1.0f),	glm::vec2(0.0f, 1.0f) });
-	vertices.push_back({ glm::vec3(1.0f, 1.0f, -1.0f),	glm::vec2(1.0f, 1.0f) });
-	vertices.push_back({ glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(1.0f, 0.0f) });
-	vertices.push_back({ glm::vec3(-1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 0.0f) });
-
-	vertices.push_back({ glm::vec3(-1.0f, -1.0f, -1.0f),glm::vec2(0.0f, 1.0f) });
-	vertices.push_back({ glm::vec3(1.0f, -1.0f, -1.0f),	glm::vec2(1.0f, 1.0f) });
-	vertices.push_back({ glm::vec3(1.0f, -1.0f, 1.0f),	glm::vec2(1.0f, 0.0f) });
-	vertices.push_back({ glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 0.0f) });
-
-	vertices.push_back({ glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 1.0f) });
-	vertices.push_back({ glm::vec3(-1.0f, -1.0f, -1.0f),glm::vec2(1.0f, 1.0f) });
-	vertices.push_back({ glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec2(1.0f, 0.0f) });
-	vertices.push_back({ glm::vec3(-1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 0.0f) });
-
-	vertices.push_back({ glm::vec3(1.0f, -1.0f, 1.0f),	glm::vec2(0.0f, 1.0f) });
-	vertices.push_back({ glm::vec3(1.0f, -1.0f, -1.0f), glm::vec2(1.0f, 1.0f) });
-	vertices.push_back({ glm::vec3(1.0f, 1.0f, -1.0f),	glm::vec2(1.0f, 0.0f) });
-	vertices.push_back({ glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 0.0f) });
-
-	vertices.push_back({ glm::vec3(-1.0f, -1.0f, -1.0f),glm::vec2(0.0f, 1.0f) });
-	vertices.push_back({ glm::vec3(1.0f, -1.0f, -1.0f), glm::vec2(1.0f, 1.0f) });
-	vertices.push_back({ glm::vec3(1.0f, 1.0f, -1.0f),	glm::vec2(1.0f, 0.0f) });
-	vertices.push_back({ glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec2(0.0f, 0.0f) });
-
-	vertices.push_back({ glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec2(0.0f, 1.0f) });
-	vertices.push_back({ glm::vec3(1.0f, -1.0f, 1.0f),	glm::vec2(1.0f, 1.0f) });
-	vertices.push_back({ glm::vec3(1.0f, 1.0f, 1.0f),	glm::vec2(1.0f, 0.0f) });
-	vertices.push_back({ glm::vec3(-1.0f, 1.0f, 1.0f),	glm::vec2(0.0f, 0.0f) });
-	//Define index buffer
-	std::vector<unsigned int>indices;
-	indices.push_back(3); indices.push_back(1); indices.push_back(0);
-	indices.push_back(2); indices.push_back(1); indices.push_back(3);
-
-	indices.push_back(6); indices.push_back(4); indices.push_back(5);
-	indices.push_back(7); indices.push_back(4); indices.push_back(6);
-
-	indices.push_back(11); indices.push_back(9); indices.push_back(8);
-	indices.push_back(10); indices.push_back(9); indices.push_back(11);
-
-	indices.push_back(14); indices.push_back(12); indices.push_back(13);
-	indices.push_back(15); indices.push_back(12); indices.push_back(14);
-
-	indices.push_back(19); indices.push_back(17); indices.push_back(16);
-	indices.push_back(18); indices.push_back(17); indices.push_back(19);
-
-	indices.push_back(22); indices.push_back(20); indices.push_back(21);
-	indices.push_back(23); indices.push_back(20); indices.push_back(22);
-	//Create vertex buffer
-	vb = api->createBuffer(vertices.data(), sizeof(Vertex) * 24, VERTEX_BUFFER);
-	//Create index buffer
-	ib = api->createBuffer(indices.data(), sizeof(unsigned int) * 36, INDEX_BUFFER);
 	//Create constant buffer
 	cbMatrices = api->createBuffer(nullptr, sizeof(Matrices), CONST_BUFFER);
 	cbView = api->createBuffer(nullptr, sizeof(ViewCB), CONST_BUFFER);
@@ -276,12 +224,14 @@ void Load(CGraphicsAPI* api)
 	api->updateBuffer(cbMatrices, &mat);
 
 	api->setInputLayout(layout);
-	api->setVertexBuffer(vb, sizeof(Vertex));
-	api->setIndexBuffer(ib);
 
 	api->setConstantBuffer(0, cbMatrices, VERTEX_SHADER);
 	api->setConstantBuffer(1, cbView, VERTEX_SHADER);
 	api->setConstantBuffer(0, cbMatrices, PIXEL_SHADER);
+
+	//initialize model and load it
+	myModel = new CModel();
+	myModel->load("Models/silly_dancing.fbx", api);
 }
 
 void Render(CGraphicsAPI* api)
@@ -290,14 +240,14 @@ void Render(CGraphicsAPI* api)
 	api->clearRenderTarget(rtv, {1.f, 1.f, 1.f, 1.f});
 	api->clearDepthStencil(depthTex);	
 	api->setShaders(sp2);
-	api->drawIndexed(36);
+	myModel->draw(api);
 
 	api->setBackBuffer();
 	api->clearBackBuffer({ 0.0f, 0.125f, 0.3f, 1.0f });
 	api->setSamplerState(0, rtv, sampler);
-	api->setTexture(0, rtv);
+	//api->setTexture(0, rtv);
 	api->setShaders(sp);
-	api->drawIndexed(36);
+	myModel->draw(api);
 
 	api->swapBuffer();
 }

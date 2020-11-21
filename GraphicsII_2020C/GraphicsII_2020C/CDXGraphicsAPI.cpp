@@ -584,8 +584,8 @@ void CDXGraphicsAPI::setShaders(CShaderProgram* program)
 	CDXVertexShader* VS = dynamic_cast<CDXVertexShader*>(program->getVertexShader());
 	CDXPixelShader* PS = dynamic_cast<CDXPixelShader*>(program->getPixelShader());
 
-	m_DeviceContext->VSSetShader(VS->m_VS, NULL, 0);
-	m_DeviceContext->PSSetShader(PS->m_PS, NULL, 0);
+	m_DeviceContext->VSSetShader(VS->m_VS, 0, 0);
+	m_DeviceContext->PSSetShader(PS->m_PS, 0, 0);
 }
 
 void CDXGraphicsAPI::drawIndexed(unsigned int indices)

@@ -73,7 +73,6 @@ struct LAYOUT_DESC
 	std::vector<LAYOUT>v_Layout;	/**< vector of LAYOUT's */
 };
 
-
 /**	\class CInputLayout
 *	\brief Class which serves as an interface for both CDXInputLayout & COGLInputLayout
 * 

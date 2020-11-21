@@ -5,32 +5,33 @@
 #include <iostream>
 #include <vector>
 
-struct Vertex
-{
-	glm::vec3 v_Position;
-	glm::vec3 v_Normal;
-	glm::vec2 v_TexCoords;
-	glm::vec3 v_Tangent;
-	glm::vec3 v_Bitangent;
-};
+class CBuffer;
+class CGraphicsAPI;
 
-struct Texture
+struct MeshVertex
 {
-	unsigned int i_ID;
-	std::string s_type;
-	std::string s_path;
+	glm::vec3 Position;
+	glm::vec2 TexCoords;
+	glm::vec3 Normal;	
+	glm::vec3 Tangent;
+	glm::vec3 Bitangent;
 };
 
 class CMesh
 {
 public:
 	
-	CMesh(std::vector<Vertex> vertex,
-		std::vector<unsigned int> index,
-		std::vector<Texture> texture);
+	CMesh(std::vector<MeshVertex>* vertex,
+		std::vector<unsigned int>* index,
+		CGraphicsAPI* api);
 	~CMesh();
+	void setupMesh(CGraphicsAPI* api);
+	void draw(CGraphicsAPI* api);
 
-	std::vector<Vertex> m_vVertices;
-	std::vector<unsigned int> m_vIndices;
-	std::vector<Texture> m_vTextures;
+private:
+
+	std::vector<MeshVertex>* m_vVertices;
+	std::vector<unsigned int>* m_vIndices;
+	CBuffer* m_pVertexBuffer;
+	CBuffer* m_pIndexBuffer;
 };

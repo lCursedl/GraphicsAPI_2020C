@@ -100,8 +100,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;dxguid.lib;winmm.lib;comctl32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\assimp</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;dxguid.lib;winmm.lib;comctl32.lib;assimp.lib;assimp-vc140-mt.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -165,6 +165,7 @@
     <ClInclude Include="CGraphicsAPI.h" />
     <ClInclude Include="CInputLayout.h" />
     <ClInclude Include="CMesh.h" />
+    <ClInclude Include="CModel.h" />
     <ClInclude Include="COGLBuffer.h" />
     <ClInclude Include="COGLGraphicsAPI.h" />
     <ClInclude Include="COGLInputLayout.h" />
@@ -196,6 +197,7 @@
     <ClCompile Include="CGraphicsAPI.cpp" />
     <ClCompile Include="CInputLayout.cpp" />
     <ClCompile Include="CMesh.cpp" />
+    <ClCompile Include="CModel.cpp" />
     <ClCompile Include="COGLBuffer.cpp" />
     <ClCompile Include="COGLGraphicsAPI.cpp" />
     <ClCompile Include="COGLInputLayout.cpp" />
