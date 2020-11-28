@@ -10,6 +10,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include "stb_image.h"
 
 void COGLGraphicsAPI::readShaderFile(std::wstring file, std::string &source)
 {
@@ -220,6 +221,59 @@ CTexture* COGLGraphicsAPI::createTexture(int width,
 	}
 	int a = glGetError();
 	return Tex;
+}
+
+CTexture* COGLGraphicsAPI::createTextureFromFile(std::string path)
+{
+	int width, height, components;
+	unsigned char* data = stbi_load(path.c_str(), &width, &height, &components, 0);
+	if (data)
+	{
+		GLenum format = GL_ZERO;
+		if (components == 1)
+		{
+			format = GL_RED;
+		}
+		else if (components == 2)
+		{
+			format = GL_RG;
+		}
+		else if (components == 3)
+		{
+			format = GL_RGB;
+		}
+		else if (components == 4)
+		{
+			format = GL_RGBA;
+		}
+
+		COGLTexture* texture = new COGLTexture();
+		glGenTextures(1, &texture->m_iTexture);
+		glBindTexture(GL_TEXTURE_2D, texture->m_iTexture);
+		glTexImage2D(GL_TEXTURE_2D,
+			0,
+			format,
+			width,
+			height,
+			0,
+			format,
+			GL_UNSIGNED_BYTE,
+			data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		stbi_image_free(data);
+
+		return texture;
+	}
+	stbi_image_free(data);
+	return nullptr;
 }
 
 std::wstring getFileNameOGL(std::wstring vsfile)

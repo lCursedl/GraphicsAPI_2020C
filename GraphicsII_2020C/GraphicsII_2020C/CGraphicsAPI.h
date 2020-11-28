@@ -63,6 +63,8 @@ public:
 		TEXTURE_BINDINGS binding,
 		FORMATS format) = 0;
 
+	virtual CTexture* createTextureFromFile(std::string path) = 0;
+
 	/**	\fn CShaderProgram* createShaderProgram()
 	*	\brief Creates a shader program and returns it.
 	*	\return CShaderProgram pointer of the corresponding API.

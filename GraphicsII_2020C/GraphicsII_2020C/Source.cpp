@@ -238,14 +238,12 @@ void Render(CGraphicsAPI* api)
 {
 	api->setRenderTarget(rtv, depthTex);
 	api->clearRenderTarget(rtv, {1.f, 1.f, 1.f, 1.f});
-	api->clearDepthStencil(depthTex);	
+	api->clearDepthStencil(depthTex);
 	api->setShaders(sp2);
 	myModel->draw(api);
-
+	
 	api->setBackBuffer();
 	api->clearBackBuffer({ 0.0f, 0.125f, 0.3f, 1.0f });
-	api->setSamplerState(0, rtv, sampler);
-	//api->setTexture(0, rtv);
 	api->setShaders(sp);
 	myModel->draw(api);
 

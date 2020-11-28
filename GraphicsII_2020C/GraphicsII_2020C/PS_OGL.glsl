@@ -20,5 +20,5 @@ layout(binding = 0) uniform sampler2D diffuse;
 
 void main()
 {
-	FragColor = Color;
+	FragColor = texture(diffuse, Texcoord);
 }

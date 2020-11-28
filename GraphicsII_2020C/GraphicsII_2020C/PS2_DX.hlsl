@@ -4,13 +4,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //--------------------------------------------------------------------------------------
 
+Texture2D txDiffuse : register ( t0 );
+SamplerState samp : register ( s0 );
+
 //--------------------------------------------------------------------------------------
 // Constant Buffer Variables
 //--------------------------------------------------------------------------------------
 cbuffer ConstantBuffer : register( b0 )
 {
 	matrix World;
-	matrix Projection;	
+	matrix Projection;
     float4 vMeshColor;
 };
 //--------------------------------------------------------------------------------------

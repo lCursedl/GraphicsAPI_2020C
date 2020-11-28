@@ -1,4 +1,32 @@
 #include "CModel.h"
+#include "CGraphicsAPI.h"
+
+std::string getTexturePath(std::string file)
+{
+	size_t realPos = 0;
+	size_t posInvSlash = file.rfind('\\');
+	size_t posSlash = file.rfind('/');
+
+	if (posInvSlash == std::string::npos)
+	{
+		if (posSlash != std::string::npos)
+		{
+			realPos = posSlash;
+		}
+	}
+	else
+	{
+		realPos = posInvSlash;
+		if (!posSlash == std::string::npos)
+		{
+			if (posSlash > realPos)
+			{
+				posSlash = realPos;
+			}
+		}
+	}
+	return file.substr(realPos, file.length() - realPos);
+}
 
 CModel::CModel(){}
 
@@ -9,13 +37,14 @@ CModel::~CModel()
 		delete m_vMeshes[i];
 	}
 	m_vMeshes.clear();
+	m_vTextures.clear();
 }
 
 void CModel::draw(CGraphicsAPI* api)
 {
 	for (unsigned int i = 0; i < m_vMeshes.size(); i++)
 	{
-		m_vMeshes[i]->draw(api);
+		m_vMeshes[i]->draw(api, m_pSampler);
 	}
 }
 
@@ -38,8 +67,14 @@ void CModel::load(std::string const& path, CGraphicsAPI* api)
 	}
 	//Retrieve the directory path of the file
 	m_sDirectory = path.substr(0, path.find_last_of('/'));
-	//Process assimo's root node recursively
+	//Process assimp's root node recursively
 	processNode(scene->mRootNode, scene, api);
+	//Create texture sampler for model's textures
+	m_pSampler = api->createSamplerState(FILTER_LINEAR,
+		FILTER_LINEAR,
+		FILTER_LINEAR,
+		0,
+		WRAP);
 }
 
 void CModel::processNode(aiNode* node, const aiScene* scene, CGraphicsAPI* api)
@@ -63,6 +98,7 @@ CMesh* CModel::processMesh(aiMesh* mesh, const aiScene* scene, CGraphicsAPI* api
 	//Data to fill
 	std::vector<MeshVertex>* vertices = new std::vector<MeshVertex>();
 	std::vector<unsigned int>* indices = new std::vector<unsigned int>();
+	std::vector<MeshTexture> textures;
 
 	//Walk through each of the mesh's vertices.
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -107,5 +143,48 @@ CMesh* CModel::processMesh(aiMesh* mesh, const aiScene* scene, CGraphicsAPI* api
 			indices->push_back(face.mIndices[j]);
 		}
 	}
-	return new CMesh(vertices, indices, api);
+
+	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+
+	std::vector<MeshTexture> diffuseMaps = loadMaterialTextures(material,
+		aiTextureType_DIFFUSE,
+		api);
+	textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+
+	return new CMesh(vertices, indices, textures, api);
+}
+
+std::vector<MeshTexture> CModel::loadMaterialTextures(aiMaterial* material,
+	aiTextureType type,
+	CGraphicsAPI* api)
+{
+	std::vector<MeshTexture> textures;
+
+	for (unsigned int i = 0; i < material->GetTextureCount(type); i++)
+	{
+		aiString aistr;
+		material->GetTexture(type, i, &aistr);
+		std::string str = std::string(aistr.C_Str());
+		str = m_sDirectory + getTexturePath(str);
+		bool skip = false;
+		for (unsigned int j = 0; j < m_vTextures.size(); j++)
+		{
+
+			if (std::strcmp(m_vTextures[j].path.data(), str.data()) == 0)
+			{
+				textures.push_back(m_vTextures[j]);
+				skip = true;
+				break;
+			}
+		}
+		if (!skip)
+		{
+			MeshTexture meshTexture;
+			meshTexture.m_Texture = api->createTextureFromFile(str);
+			meshTexture.path = str;
+			textures.push_back(meshTexture);
+			m_vTextures.push_back(meshTexture);
+		}
+	}
+	return textures;
 }

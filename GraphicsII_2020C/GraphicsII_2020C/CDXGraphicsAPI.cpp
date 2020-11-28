@@ -5,6 +5,9 @@
 #include "CDXShaderProgram.h"
 #include "CDXInputLayout.h"
 #include "CDXSamplerState.h"
+#include "stb_image.h"
+#include <wincodec.h>
+#include <wincodecsdk.h>
 
 bool CDXGraphicsAPI::init(HWND window)
 {
@@ -204,7 +207,7 @@ CTexture* CDXGraphicsAPI::createTexture(int width,
 		Desc.MiscFlags = 0;
 
 		//Create texture with descriptor
-		HRESULT hr = m_Device->CreateTexture2D(&Desc, NULL, &DXTexture->m_pTexture);
+		HRESULT hr = m_Device->CreateTexture2D(&Desc, nullptr, &DXTexture->m_pTexture);
 		if (FAILED(hr))
 		{
 			delete DXTexture;
@@ -271,6 +274,83 @@ CTexture* CDXGraphicsAPI::createTexture(int width,
 		return nullptr;
 	}
 }
+
+	CTexture* CDXGraphicsAPI::createTextureFromFile(std::string path)
+	{
+		int width, height, components;
+		unsigned char* data = stbi_load(path.c_str(), &width, &height, &components, 0);
+		if (data)
+		{
+			CDXTexture* texture = new CDXTexture();
+			D3D11_TEXTURE2D_DESC desc;
+			ZeroMemory(&desc, sizeof(desc));
+
+			desc.Width = width;
+			desc.Height = height;
+			desc.MipLevels = 1;
+			desc.ArraySize = 1;
+			desc.SampleDesc.Count = 1;
+			desc.SampleDesc.Quality = 0;
+			desc.Usage = D3D11_USAGE_DEFAULT;
+			desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+			desc.MiscFlags = 0;
+
+			if (components == 1)
+			{
+				desc.Format = DXGI_FORMAT_R16_FLOAT;
+			}
+			else if (components == 2)
+			{
+				desc.Format = DXGI_FORMAT_R16G16_FLOAT;
+			}
+			else if (components == 3)
+			{
+				desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+			}
+			else if (components == 4)
+			{
+				desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+			}
+
+			//Texture data
+			D3D11_SUBRESOURCE_DATA initData;
+			ZeroMemory(&initData, sizeof(initData));
+			initData.pSysMem = data;
+			initData.SysMemPitch = 1;
+
+			if (FAILED(m_Device->CreateTexture2D(&desc,
+												&initData,
+												&texture->m_pTexture)))
+			{
+				delete texture;
+				stbi_image_free(data);
+				return nullptr;
+			}
+
+			//Shader resource data
+			D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
+			ZeroMemory(&viewDesc, sizeof(viewDesc));
+			viewDesc.Format = desc.Format;
+			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			viewDesc.Texture2D.MostDetailedMip = 0;
+			viewDesc.Texture2D.MipLevels = 1;
+
+			if (FAILED(m_Device->CreateShaderResourceView(texture->m_pTexture,
+															&viewDesc,
+															&texture->m_pSRV)))
+			{
+				delete texture;
+				stbi_image_free(data);
+				return nullptr;
+			}
+
+			return texture;
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
 
 std::wstring getFileName(std::wstring vsfile)
 {

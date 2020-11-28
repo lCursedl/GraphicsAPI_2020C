@@ -23,6 +23,7 @@ public:
         int height,
         TEXTURE_BINDINGS binding,
         FORMATS format)                                       override;
+    CTexture* createTextureFromFile(std::string path)         override;
     CShaderProgram* createShaderProgram()                     override;
     CBuffer* createBuffer(const void* data,
         unsigned int size,
