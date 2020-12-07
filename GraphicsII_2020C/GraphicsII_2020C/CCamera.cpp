@@ -64,7 +64,7 @@ void CCamera::setRight(glm::vec3 rUp, glm::vec3 rFront)
 
 void CCamera::setUp(glm::vec3 rFront, glm::vec3 rRight)
 {
-	Up = glm::normalize(glm::cross(Front, Right));
+	Up = glm::cross(Front, Right);
 }
 
 void CCamera::setFOV(float rFOV)
@@ -144,9 +144,9 @@ glm::vec3 CCamera::getRight()
 
 void CCamera::updateVM()
 {
-	Right = { View[0][0], View[0][1], View[0][2] };
-	Up =	{ View[1][0], View[1][1], View[1][2] };
-	Front = { View[2][0], View[2][1], View[2][2] };
+	Right = { View[0][0], View[1][0], View[2][0] };
+	Up =	{ View[0][1], View[1][1], View[2][1] };
+	Front = { View[0][2], View[1][2], View[2][2] };
 	LAt = Front + Pos;
 }
 
@@ -159,20 +159,20 @@ void CCamera::move()
 {
 	if (mForward)
 	{
-		Pos += (getFront() * STEP);
+		Pos += (Front * STEP);
 	}
 	if (mBack)
 	{
-		Pos += (getFront() * -STEP);
+		Pos += (Front * -STEP);
 	}
 
 	if (mLeft)
 	{
-		Pos += (getRight() * -STEP);
+		Pos += (Right * -STEP);
 	}
 	if (mRight)
 	{
-		Pos += (getRight() * STEP);
+		Pos += (Right * STEP);
 	}
 
 	if (mUp)
@@ -184,25 +184,38 @@ void CCamera::move()
 		Pos += (Up * -STEP);
 	}
 
-	glm::mat4 Axis
-	{
-		Right.x, Right.y, Right.z,	0,
-		Up.x,	 Up.y,	  Up.z,		0,
-		Front.x, Front.y, Front.z,	0,
-		0,		 0,		  0,		1
+	glm::mat4 Axis{
+		Right.x, Up.x, Front.x,	0,
+		Right.y, Up.y, Front.y,	0,
+		Right.z, Up.z, Front.z,	0,
+		0,		 0,	   0,		1
 	};
 
-	glm::mat4 Position
-	{
-		1, 0, 0, -Pos.x,
-		0, 1, 0, -Pos.y,
-		0, 0, 1, -Pos.z,
-		0, 0, 0, 1
+	glm::mat4 Position{
+		1,		0,		0,		0,
+		0,		1,		0,		0,
+		0,		0,		1,		0,
+		-Pos.x, -Pos.y, -Pos.z, 1
 	};
 
-	Position *= Axis;
+	/*glm::mat4 Axis = glm::mat4(1.f);
+	Axis[0][0] = Right.x;
+	Axis[1][0] = Right.y;
+	Axis[2][0] = Right.z;
+	Axis[0][1] = Up.x;
+	Axis[1][1] = Up.y;
+	Axis[2][1] = Up.z;
+	Axis[0][2] = Front.x;
+	Axis[1][2] = Front.y;
+	Axis[2][2] = Front.z;
 
-	View = Position;
+	glm::mat4 Position = glm::mat4(1.f);
+
+	Position[3][0] = -Pos.x;
+	Position[3][1] = -Pos.y;
+	Position[3][2] = -Pos.z;*/
+
+	View = Axis * Position;
 
 	updateVM();
 }
@@ -232,9 +245,9 @@ void CCamera::rotateUp(glm::vec3 Dir)
 
 	glm::mat4 RotX
 	{
-		camcos,  0.f, camsin,	0.f,
+		camcos,  0.f, -camsin,	0.f,
 		0.f,	 1.f, 0.f,		0.f,
-		-camsin, 0.f, camcos,	0.f,
+		camsin, 0.f, camcos,	0.f,
 		0.f,	 0.f, 0.f,		1.f
 	};
 	View *= RotX;
@@ -249,8 +262,8 @@ void CCamera::rotateRight(glm::vec3 Dir)
 	glm::mat4 RotY
 	{
 		1.f, 0.f,	  0.f,	  0.f,
-		0.f, camcos, -camsin, 0.f,
-		0.f, camsin, camcos,  0.f,
+		0.f, camcos, camsin, 0.f,
+		0.f, -camsin, camcos,  0.f,
 		0.f, 0.f,	 0.f,	  1.f
 	};
 	View *= RotY;
@@ -264,8 +277,8 @@ void CCamera::rotateFront(glm::vec3 Dir)
 
 	glm::mat4 RotZ
 	{
-		camcos, -camsin,	0,	0.f,
-		camsin, camcos, 0.f,0.f,
+		camcos, camsin,	0,	0.f,
+		-camsin, camcos, 0.f,0.f,
 		0.f, 0.f,1.f, 0.f,
 		0.f, 0.f,	0.f,	1.f
 	};
@@ -372,7 +385,7 @@ glm::mat4 CCamera::getProjection()
 
 glm::mat4 CCamera::getView()
 {
-	if (!mRowMajor)
+	if (mRowMajor)
 	{
 		return glm::transpose(View);
 	}
@@ -386,17 +399,18 @@ void CCamera::createVM()
 	setUp(getFront(), getRight());
 
 	glm::mat4 Axis{
-		Right.x, Right.y, Right.z,	0,
-		Up.x,	 Up.y,	  Up.z,		0,
-		Front.x, Front.y, Front.z,	0,
-		0,		 0,		  0,		1
+		Right.x, Up.x, Front.x,	0,
+		Right.y, Up.y, Front.y,	0,
+		Right.z, Up.z, Front.z,	0,
+		0,		 0,	   0,		1
 	};
 
 	glm::mat4 Position{
-		1, 0, 0, -Pos.x,
-		0, 1, 0, -Pos.y,
-		0, 0, 1, -Pos.z,
-		0, 0, 0, 1
+		1,		0,		0,		0,
+		0,		1,		0,		0,
+		0,		0,		1,		0,
+		-Pos.x, -Pos.y, -Pos.z, 1
 	};
-	View = Position * Axis;
+
+	View = Axis * Position;
 }

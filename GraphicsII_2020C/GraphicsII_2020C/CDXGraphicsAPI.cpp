@@ -278,7 +278,7 @@ CTexture* CDXGraphicsAPI::createTexture(int width,
 	CTexture* CDXGraphicsAPI::createTextureFromFile(std::string path)
 	{
 		int width, height, components;
-		unsigned char* data = stbi_load(path.c_str(), &width, &height, &components, 0);
+		unsigned char* data = stbi_load(path.c_str(), &width, &height, &components, 4);
 		if (data)
 		{
 			CDXTexture* texture = new CDXTexture();
@@ -294,29 +294,13 @@ CTexture* CDXGraphicsAPI::createTexture(int width,
 			desc.Usage = D3D11_USAGE_DEFAULT;
 			desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 			desc.MiscFlags = 0;
-
-			if (components == 1)
-			{
-				desc.Format = DXGI_FORMAT_R16_FLOAT;
-			}
-			else if (components == 2)
-			{
-				desc.Format = DXGI_FORMAT_R16G16_FLOAT;
-			}
-			else if (components == 3)
-			{
-				desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
-			}
-			else if (components == 4)
-			{
-				desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
-			}
+			desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 
 			//Texture data
 			D3D11_SUBRESOURCE_DATA initData;
 			ZeroMemory(&initData, sizeof(initData));
 			initData.pSysMem = data;
-			initData.SysMemPitch = 1;
+			initData.SysMemPitch = width * 4;
 
 			if (FAILED(m_Device->CreateTexture2D(&desc,
 												&initData,

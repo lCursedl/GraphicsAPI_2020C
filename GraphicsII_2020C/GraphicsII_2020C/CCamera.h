@@ -265,7 +265,7 @@ private:
 
 	glm::vec3 Front;	/**< Vec3 for Front */
 	glm::vec3 Right;	/**< Vec3 for Right */
-
+	
 	float NearPlane;	/**< float variable */
 	float FarPlane;		/**< float variable */
 	float FOV;			/**< float Field Of View value */

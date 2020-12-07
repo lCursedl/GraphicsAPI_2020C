@@ -63,10 +63,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 		CW_USEDEFAULT,
 		800,
 		600,
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
 		hInstance,
-		NULL);
+		nullptr);
 
 	if (hwnd == NULL)
 	{
@@ -75,7 +75,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 
 	ShowWindow(hwnd, nCmdShow);
 
-	CGraphicsAPI* graphicsAPI = new COGLGraphicsAPI();
+	CGraphicsAPI* graphicsAPI = new CDXGraphicsAPI();
 	graphicsAPI->init(hwnd);
 	Load(graphicsAPI);
 
