@@ -657,6 +657,11 @@ void CDXGraphicsAPI::drawIndexed(unsigned int indices)
 	m_DeviceContext->DrawIndexed(indices, 0, 0);
 }
 
+void CDXGraphicsAPI::draw(unsigned int count, unsigned int first)
+{
+	m_DeviceContext->Draw(count, first);
+}
+
 void CDXGraphicsAPI::clearBackBuffer(COLOR color)
 {
 	float Color[4] = { color.red, color.green, color.blue, color.alpha };
@@ -889,6 +894,42 @@ void CDXGraphicsAPI::setTexture(unsigned int slot, CTexture* texture)
 		return;
 	}
 	m_DeviceContext->PSSetShaderResources(slot, 1, &tex->m_pSRV);
+}
+
+void CDXGraphicsAPI::setTopology(TOPOLOGY topology)
+{
+	D3D11_PRIMITIVE_TOPOLOGY T = D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
+	switch (topology)
+	{
+	case TOPOLOGY::POINTS:
+		T = D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
+		break;
+	case TOPOLOGY::LINES:
+		T = D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
+		break;
+	case TOPOLOGY::TRIANGLES:
+		T = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		break;
+	case TOPOLOGY::LINE_STRIP:
+		T = D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP;
+		break;
+	case TOPOLOGY::TRIANGLE_STRIP:
+		T = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+		break;
+	case TOPOLOGY::LINE_ADJACENCY:
+		T = D3D11_PRIMITIVE_TOPOLOGY_LINELIST_ADJ;
+		break;
+	case TOPOLOGY::TRIANGLE_ADJANCENCY:
+		T = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
+		break;
+	case TOPOLOGY::LINE_STRIP_ADJACENCY:
+		T = D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP_ADJ;
+		break;
+	case TOPOLOGY::TRIANGLE_STRIP_ADJACENCY:
+		T = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ;
+		break;
+	}
+	m_DeviceContext->IASetPrimitiveTopology(T);
 }
 
 void CDXGraphicsAPI::swapBuffer()

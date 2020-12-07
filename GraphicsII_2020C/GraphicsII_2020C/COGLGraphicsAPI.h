@@ -12,6 +12,7 @@ private:
     HDC m_Handle;
     HGLRC oglRenderContext;
     void fillFormats();
+    GLenum m_Topology;
 
 public:
     bool init(HWND window);
@@ -44,6 +45,7 @@ public:
     void setViewport(int width, int height)                   override;
     void setShaders(CShaderProgram* program)                  override;
     void drawIndexed(unsigned int indices)                    override;
+    void draw(unsigned int count, unsigned int first)         override;
     void clearBackBuffer(COLOR color)                         override;
     void setInputLayout(CInputLayout* layout)                 override;
     void setRenderTarget(CTexture* texture, CTexture* depth)  override;
@@ -59,6 +61,7 @@ public:
     void clearRenderTarget(CTexture* rt, COLOR color)         override;
     void clearDepthStencil(CTexture* ds)                      override;
     void setTexture(unsigned int slot, CTexture* texture)     override;
+    void setTopology(TOPOLOGY topology)                       override;
 
     //SWAPCHAIN
 

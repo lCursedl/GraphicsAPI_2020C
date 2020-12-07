@@ -329,7 +329,12 @@ void COGLGraphicsAPI::setShaders(CShaderProgram* program)
 
 void COGLGraphicsAPI::drawIndexed(unsigned int indices)
 {
-	glDrawElements(GL_TRIANGLES, indices, GL_UNSIGNED_INT, 0);
+	glDrawElements(m_Topology, indices, GL_UNSIGNED_INT, 0);
+}
+
+void COGLGraphicsAPI::draw(unsigned int count, unsigned int first)
+{
+	glDrawArrays(m_Topology, first, count);
 }
 
 void COGLGraphicsAPI::clearBackBuffer(COLOR color)
@@ -557,6 +562,40 @@ void COGLGraphicsAPI::setTexture(unsigned int slot, CTexture* texture)
 	}
 	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(GL_TEXTURE_2D, tex->m_iTexture);
+}
+
+void COGLGraphicsAPI::setTopology(TOPOLOGY topology)
+{
+	switch (topology)
+	{
+	case TOPOLOGY::POINTS:
+		m_Topology = GL_POINTS;
+		break;
+	case TOPOLOGY::LINES:
+		m_Topology = GL_LINES;
+		break;
+	case TOPOLOGY::TRIANGLES:
+		m_Topology = GL_TRIANGLES;
+		break;
+	case TOPOLOGY::LINE_STRIP:
+		m_Topology = GL_LINE_STRIP;
+		break;
+	case TOPOLOGY::TRIANGLE_STRIP:
+		m_Topology = GL_TRIANGLE_STRIP;
+		break;
+	case TOPOLOGY::LINE_ADJACENCY:
+		m_Topology = GL_LINES_ADJACENCY;
+		break;
+	case TOPOLOGY::TRIANGLE_ADJANCENCY:
+		m_Topology = GL_TRIANGLES_ADJACENCY;
+		break;
+	case TOPOLOGY::LINE_STRIP_ADJACENCY:
+		m_Topology = GL_LINE_STRIP_ADJACENCY;
+		break;
+	case TOPOLOGY::TRIANGLE_STRIP_ADJACENCY:
+		m_Topology = GL_TRIANGLE_STRIP_ADJACENCY;
+		break;
+	}
 }
 
 void COGLGraphicsAPI::swapBuffer()

@@ -27,6 +27,19 @@ struct COLOR
 	float alpha;
 };
 
+enum class TOPOLOGY
+{
+	POINTS,
+	LINES,
+	TRIANGLES,
+	LINE_STRIP,
+	TRIANGLE_STRIP,
+	LINE_ADJACENCY,
+	TRIANGLE_ADJANCENCY,
+	LINE_STRIP_ADJACENCY,
+	TRIANGLE_STRIP_ADJACENCY
+};
+
 /**	\class CGraphicsAPI
 *	\brief Class which serves as an interface for CDXGraphicsAPI & COGLGraphicsAPI.
 */
@@ -143,6 +156,13 @@ public:
 	*/
 	virtual void drawIndexed(unsigned int indices) = 0;
 
+	/**	\fn void draw()
+	*	\brief Makes a draw call with the currently bound vertex buffer.
+	*	@param[in] count Amount of vertices.
+	*	@param[in] first Start location to read the vertices.
+	*/
+	virtual void draw(unsigned int count, unsigned int first) = 0;
+
 	/** \fn void setShaders(CShaderProgram* program)
 	*	\brief Receives a shader program and sets both its vertex and pixel shader
 	*	as current.
@@ -231,6 +251,12 @@ public:
 	*	@param[in] texture Texture to set.
 	*/
 	virtual void setTexture(unsigned int slot, CTexture* texture) = 0;
+
+	/** \fn void setTopology(TOPOLOGY topology)
+	*	\brief Sets the topology type for vertex data.
+	*	@param[in] topology TOPOLOGY type to set.
+	*/
+	virtual void setTopology(TOPOLOGY topology) = 0;
 
 	//SWAPCHAIN
 
