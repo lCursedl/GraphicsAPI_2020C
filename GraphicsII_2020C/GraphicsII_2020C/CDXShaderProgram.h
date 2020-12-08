@@ -12,11 +12,13 @@
 class CDXShaderProgram :
     public CShaderProgram
 {
-public:
+protected:
 
     /** \fn CDXShaderProgram()
     *   \brief Class constructor
     *   Initializes m_pVertexShader & m_pPixelShader.
     */
     CDXShaderProgram();
+
+    friend class CDXGraphicsAPI;
 };

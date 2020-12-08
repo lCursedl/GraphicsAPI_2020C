@@ -8,11 +8,15 @@
 class COGLPixelShader :
     public CPixelShader
 {
-public:
+protected:
+
     /** \fn COGLPixelShader()
     *   \brief Class constructor.
     */
     COGLPixelShader();
+
+public:
+    
 
     /** \fn ~COGLPixelShader()
     *   \brief Class destructor.

@@ -22,7 +22,7 @@ struct ViewCB
 };
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-void Load(CGraphicsAPI* api);
+void Load(CGraphicsAPI* api, HWND hWnd);
 void Render(CGraphicsAPI* api);
 void Clear();
 void Update(CGraphicsAPI* api);
@@ -77,7 +77,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 
 	CGraphicsAPI* graphicsAPI = new CDXGraphicsAPI();
 	graphicsAPI->init(hwnd);
-	Load(graphicsAPI);
+	Load(graphicsAPI, hwnd);
 
 	MSG msg = {};
 	while (WM_QUIT != msg.message)
@@ -159,8 +159,12 @@ void Clear()
 	delete myModel;
 }
 
-void Load(CGraphicsAPI* api)
+void Load(CGraphicsAPI* api, HWND hWnd)
 {
+	api->setTopology(TOPOLOGY::TRIANGLES);
+	RECT rc;
+	GetClientRect(hWnd, &rc);
+	api->setViewport(0, 0, rc.right, rc.bottom);
 	//Create rt for offscreen rendering
 	rtv = api->createTexture(800, 600,
 		TEXTURE_BINDINGS::RENDER_TARGET | TEXTURE_BINDINGS::SHADER_RESOURCE,
@@ -198,16 +202,16 @@ void Load(CGraphicsAPI* api)
 	//Create input layout
 	layout = api->createInputLayout(sp, lDesc);
 	//Create constant buffer
-	cbMatrices = api->createBuffer(nullptr, sizeof(Matrices), CONST_BUFFER);
-	cbView = api->createBuffer(nullptr, sizeof(ViewCB), CONST_BUFFER);
+	cbMatrices = api->createBuffer(nullptr, sizeof(Matrices), sizeof(Matrices),CONST_BUFFER);
+	cbView = api->createBuffer(nullptr, sizeof(ViewCB), sizeof(ViewCB),CONST_BUFFER);
 	//Initialize VM and PM of camera
 	CameraDesc desc;
-	desc.Pos = { 0.f, 3.f, -6.f };
-	desc.LAt = { 0.f, 1.f, 0.f };
+	desc.Pos = { 0.f, 2.f, -6.f };
+	desc.LAt = { 0.f, 2.f, -5.f };
 	desc.Up = { 0.f, 1.f, 0.f };
-	desc.FOV = 0.785398f;
-	desc.Width = 800.f;
-	desc.Height = 600.f;
+	desc.FOV = glm::radians(40.f);
+	desc.Width = rc.right;
+	desc.Height = rc.bottom;
 	desc.NearPlane = 0.01f;
 	desc.FarPlane = 100.f;
 

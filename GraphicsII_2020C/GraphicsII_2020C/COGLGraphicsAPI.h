@@ -28,6 +28,7 @@ public:
     CShaderProgram* createShaderProgram()                     override;
     CBuffer* createBuffer(const void* data,
         unsigned int size,
+        unsigned int stride,
         BUFFER_TYPE type)                                     override;
     CInputLayout* createInputLayout(CShaderProgram* program,
         LAYOUT_DESC desc)                                     override;
@@ -42,7 +43,10 @@ public:
     //DEVICE CONTEXT
 
     void setBackBuffer()                                      override;
-    void setViewport(int width, int height)                   override;
+    void setViewport(int topLeftX,
+        int topLeftY,
+        int width,
+        int height)                                           override;
     void setShaders(CShaderProgram* program)                  override;
     void drawIndexed(unsigned int indices)                    override;
     void draw(unsigned int count, unsigned int first)         override;
@@ -50,7 +54,7 @@ public:
     void setInputLayout(CInputLayout* layout)                 override;
     void setRenderTarget(CTexture* texture, CTexture* depth)  override;
     void updateBuffer(CBuffer* buffer, const void* data)      override;
-    void setVertexBuffer(CBuffer* buffer, unsigned int size)  override;
+    void setVertexBuffer(CBuffer* buffer)  override;
     void setIndexBuffer(CBuffer* buffer)                      override;
     void setSamplerState(unsigned int slot,
         CTexture* texture,

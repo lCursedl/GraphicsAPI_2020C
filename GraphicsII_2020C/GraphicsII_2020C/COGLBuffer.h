@@ -8,12 +8,15 @@
 class COGLBuffer :
     public CBuffer
 {
-public:
+protected:
 
-    COGLBuffer();
     /** \fn COGLBuffer()
     *   \brief Class constructor.
     */
+    COGLBuffer() = default;
+    
+
+public:    
 
     ~COGLBuffer();
     /** \fn ~COGLBuffer()
@@ -23,8 +26,9 @@ public:
 
 private:
 
-    unsigned int m_Type;    /**< unsigned int for buffer type storing */
-    unsigned int m_Size;    /**< unsigned int for buffer size storing */
+    unsigned int m_Type;    /**< unsigned int for buffer type storing. */
+    int m_Size;             /**< int for buffer size storing. */
+    int m_Stride;           /**< int for buffer stride storing.*/
     unsigned int m_Buffer;  /**< unsigned int for OpenGL buffer index */
 
     friend class COGLGraphicsAPI;

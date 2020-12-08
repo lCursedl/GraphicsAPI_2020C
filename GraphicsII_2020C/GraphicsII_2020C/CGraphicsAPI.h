@@ -88,18 +88,21 @@ public:
 	*	\brief Creates a buffer with the received parameters and optionally data.
 	*	@param[in] data Pointer to the data to load. Can be nullptr.
 	*	@param[in] size Size of the data to load.
+	*	@param[in] stride Lenght of the data.
 	*	@param[in] type	Type of buffer to create (VERTEX_BUFFER,
 	*	INDEX_BUFFER, CONST_BUFFER).
 	*	\return CBuffer pointer of the corresponding API.
 	*/
 	virtual CBuffer* createBuffer(const void* data,
 		unsigned int size,
+		unsigned int stride,
 		BUFFER_TYPE type) = 0;
 
 	/**	\fn CInputLayout* createInputLayout(CShaderProgram* program, LAYOUT_DESC desc)
 	*	\brief Creates an input layout from a descriptor and shader program.
 	*	@param[in] program ShaderProgram from where to extract info.
-	*	@param[in] 
+	*	@param[in] desc The layout descriptor.
+	*	\return CInputLayout pointer of the corresponding API.
 	*/
 	virtual CInputLayout* createInputLayout(CShaderProgram* program,
 		LAYOUT_DESC desc) = 0;
@@ -122,13 +125,17 @@ public:
 		unsigned int anisotropic,
 		WRAPPING wrapMode) = 0;
 
-	/**
-	* 
+	/**	\fn CVertexShader* createVertexShader(std::wstring file)
+	*	\brief Creates a vertex shader from the specified file, if available.
+	*	@param[in] file Filename of the vertex shader.
+	*	\return CVertexShader pointer of the corresponding API.
 	*/
 	virtual CVertexShader* createVertexShader(std::wstring file) = 0;
 
-	/**
-	* 
+	/**	\fn CPixelShader* createPixelShader(std::wstring file)
+	*	\brief Creates a pixe shader from the specified file, if available.
+	*	@param[in] file Filename of the pixel shader.
+	*	\return CPixelShader pointer of the corresponding API.
 	*/
 	virtual CPixelShader* createPixelShader(std::wstring file) = 0;
 
@@ -143,12 +150,12 @@ public:
 
 	/**	\fn setViewport(int width, int height)
 	*	\brief Sets the viewport area
+	*	@param[in] topLeftX Corner on the X axis of the render area.
+	*	@param[in] topLeftY Corner on the Y axis of the render area.
 	*	@param[in] width Width of render area.
 	*	@param[in] height Height of render area.
-	* 
-	*	Default corner is 0, 0.
 	*/
-	virtual void setViewport(int width, int height) = 0;
+	virtual void setViewport(int topLeftX, int topLeftY, int width, int height) = 0;
 
 	/** \fn void drawIndexed(unsigned int indices)
 	*	\brief Makes a draw call with the specified amount of indices.
@@ -202,7 +209,7 @@ public:
 	*	@param[in] buffer Buffer to set.
 	*	\warning If buffer is nullptr, no operations are done.
 	*/
-	virtual void setVertexBuffer(CBuffer* buffer, unsigned int size) = 0;
+	virtual void setVertexBuffer(CBuffer* buffer) = 0;
 
 	/** \fn void setIndexBuffer(CBuffer* buffer)
 	*	\brief Sets the specified buffer as the current index buffer.

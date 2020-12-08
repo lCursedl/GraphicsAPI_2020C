@@ -4,7 +4,3 @@ COGLVertexShader::COGLVertexShader()
 {
 	m_VertexShader = 0;
 }
-
-COGLVertexShader::~COGLVertexShader()
-{
-}

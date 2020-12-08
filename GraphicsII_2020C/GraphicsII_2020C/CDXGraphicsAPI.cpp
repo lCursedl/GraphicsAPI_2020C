@@ -149,12 +149,6 @@ bool CDXGraphicsAPI::init(HWND window)
 	m_BackBuffer = backBuffer;
 	m_DepthStencil = depthTexture;
 
-	//Set Viewport
-	setViewport(width, height);
-
-	//Set topology
-	m_DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
 	fillFormats();
 
 	return true;
@@ -373,6 +367,7 @@ CShaderProgram* CDXGraphicsAPI::createShaderProgram()
 
 CBuffer* CDXGraphicsAPI::createBuffer(const void* data,
 	unsigned int size,
+	unsigned int stride,
 	BUFFER_TYPE type)
 {
 	if (size != 0)
@@ -386,6 +381,7 @@ CBuffer* CDXGraphicsAPI::createBuffer(const void* data,
 		buffDesc.BindFlags = (D3D11_BIND_FLAG)type;
 
 		CDXBuffer* DXBuffer = new CDXBuffer();
+		DXBuffer->m_Stride = stride;
 
 		if (data != nullptr)
 		{
@@ -631,15 +627,15 @@ void CDXGraphicsAPI::setBackBuffer()
 		dynamic_cast<CDXTexture*>(m_DepthStencil)->m_pDSV);
 }
 
-void CDXGraphicsAPI::setViewport(int width, int height)
+void CDXGraphicsAPI::setViewport(int topLeftX, int topLeftY, int width, int height)
 {
 	D3D11_VIEWPORT vp;
-	vp.Width = (float)width;
-	vp.Height = (float)height;
+	vp.Width = width;
+	vp.Height = height;
 	vp.MinDepth = 0.f;
 	vp.MaxDepth = 1.f;
-	vp.TopLeftX = 0.f;
-	vp.TopLeftY = 0.f;
+	vp.TopLeftX = topLeftX;
+	vp.TopLeftY = topLeftY;
 	m_DeviceContext->RSSetViewports(1, &vp);
 }
 
@@ -754,7 +750,7 @@ void CDXGraphicsAPI::updateBuffer(CBuffer* buffer, const void* data)
 	m_DeviceContext->UpdateSubresource(buff->m_Buffer, 0, nullptr, data, 0, 0);
 }
 
-void CDXGraphicsAPI::setVertexBuffer(CBuffer* buffer, unsigned int size)
+void CDXGraphicsAPI::setVertexBuffer(CBuffer* buffer)
 {
 	if (buffer != nullptr)
 	{
@@ -762,7 +758,12 @@ void CDXGraphicsAPI::setVertexBuffer(CBuffer* buffer, unsigned int size)
 		if (buff->m_Buffer != nullptr)
 		{
 			unsigned int offset = 0;
-			m_DeviceContext->IASetVertexBuffers(0, 1, &buff->m_Buffer, &size, &offset);
+			m_DeviceContext->IASetVertexBuffers(
+				0,
+				1,
+				&buff->m_Buffer,
+				&buff->m_Stride,
+				&offset);
 		}
 		else
 		{

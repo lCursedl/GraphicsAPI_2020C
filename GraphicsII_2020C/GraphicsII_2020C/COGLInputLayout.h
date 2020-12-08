@@ -8,11 +8,14 @@
 class COGLInputLayout :
     public CInputLayout
 {
-public:
+protected:
+
     /** \fn COGLInputLayout()
-    *   \brief Class constructor.
-    */
-    COGLInputLayout();
+        *   \brief Class constructor.
+        */
+    COGLInputLayout() = default;
+
+public:    
     
     /** \fn ~COGLInputLayout()
     *   \brief Class destructor.

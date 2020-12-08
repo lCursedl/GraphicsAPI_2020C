@@ -1,7 +1,10 @@
 #include "COGLSamplerState.h"
 #include <glad/glad.h>
 
-COGLSamplerState::COGLSamplerState(){}
+COGLSamplerState::COGLSamplerState()
+{
+	m_Sampler = 0;
+}
 
 COGLSamplerState::~COGLSamplerState()
 {

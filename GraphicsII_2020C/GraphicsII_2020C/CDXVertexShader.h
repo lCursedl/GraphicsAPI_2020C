@@ -8,13 +8,16 @@
 class CDXVertexShader :
     public CVertexShader
 {
-public:
+protected:
+
     /** \fn CDXVertexShader()
     *   \brief Class constructor.
-    * 
+    *
     *   Sets m_Blob & m_VS as nullptr.
     */
     CDXVertexShader();
+
+public:    
 
     /** \fn ~CDXVertexShader()
     *   \brief Class destructor.

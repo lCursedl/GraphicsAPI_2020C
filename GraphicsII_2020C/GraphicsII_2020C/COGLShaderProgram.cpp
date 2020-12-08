@@ -2,8 +2,6 @@
 #include "COGLVertexShader.h"
 #include "COGLPixelShader.h"
 
-COGLShaderProgram::COGLShaderProgram(){}
-
 COGLShaderProgram::~COGLShaderProgram()
 {
 	glDeleteProgram(m_Program);

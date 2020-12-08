@@ -158,9 +158,6 @@ bool COGLGraphicsAPI::init(HWND window)
 	{
 		return false;
 	}
-	RECT rc;
-	GetWindowRect(window, &rc);
-	setViewport(rc.right - rc.left, rc.bottom - rc.top);
 	glEnable(GL_DEPTH_TEST);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -316,9 +313,9 @@ void COGLGraphicsAPI::setBackBuffer()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void COGLGraphicsAPI::setViewport(int width, int height)
+void COGLGraphicsAPI::setViewport(int topLeftX, int topLeftY, int width, int height)
 {
-	glViewport(0, 0, width, height);
+	glViewport(topLeftX, topLeftY, width, height);
 }
 
 void COGLGraphicsAPI::setShaders(CShaderProgram* program)
@@ -416,14 +413,14 @@ void COGLGraphicsAPI::updateBuffer(CBuffer* buffer, const void* data)
 	glBindBuffer(buff->m_Type, 0);
 }
 
-void COGLGraphicsAPI::setVertexBuffer(CBuffer* buffer, unsigned int size)
+void COGLGraphicsAPI::setVertexBuffer(CBuffer* buffer)
 {
 	if (buffer != nullptr)
 	{
 		COGLBuffer* buff = dynamic_cast<COGLBuffer*>(buffer);
 		if (buff->m_Buffer != 0)
 		{
-			glBindVertexBuffer(0, buff->m_Buffer, 0, size);
+			glBindVertexBuffer(0, buff->m_Buffer, 0, buff->m_Stride);
 		}
 		else
 		{
@@ -605,6 +602,7 @@ void COGLGraphicsAPI::swapBuffer()
 
 CBuffer* COGLGraphicsAPI::createBuffer(const void* data,
 	unsigned int size,
+	unsigned int stride,
 	BUFFER_TYPE type)
 {
 	if (size != 0)
@@ -613,6 +611,7 @@ CBuffer* COGLGraphicsAPI::createBuffer(const void* data,
 
 		glGenBuffers(1, &OGLBuffer->m_Buffer);
 		OGLBuffer->m_Size = size;
+		OGLBuffer->m_Stride = stride;
 
 		switch (type)
 		{

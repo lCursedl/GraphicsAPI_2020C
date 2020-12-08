@@ -8,17 +8,21 @@
 class COGLVertexShader :
     public CVertexShader
 {
-public:
+protected:
+
     /** \fn COGLVertexShader()
     *   \brief Class constructor.
     */
     COGLVertexShader();
 
+public:
+    
+
     /** ~COGLVertexShader()
     *   \brief Class destructor.
     *   If m_VertexShader was used, release memory before deleting object.
     */
-    ~COGLVertexShader();
+    ~COGLVertexShader() = default;
 
 private:
     unsigned int m_VertexShader;    /**< unsigned int for OpenGL vertex shader index. */

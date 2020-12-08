@@ -8,11 +8,15 @@
 class COGLTexture :
     public CTexture
 {
-public:
+protected:
+
     /** \fn COGLTexture()
     *   \brief Class constructor.
     */
     COGLTexture();
+
+public:
+    
 
     /** \fn ~COGLTexture()
     *   \brief Class destructor.

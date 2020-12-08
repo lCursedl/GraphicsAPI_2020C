@@ -8,20 +8,23 @@
 class CDXInputLayout :
     public CInputLayout
 {
-public:
-    /** \fn CDXInputLayout()
-   *   \brief Class constructor.
-   *
-   *   Sets m_InputLayout as nullptr.
-   */
-    CDXInputLayout();
+public:    
    
     /** \fn ~CDXInputLayout()
     *   \brief Class destructor.
     *
     *   If m_InputLayout was used, release memory before deleting object.
     */
-    ~CDXInputLayout();    
+    ~CDXInputLayout();
+
+protected:
+
+    /** \fn CDXInputLayout()
+   *   \brief Class constructor.
+   *
+   *   Sets m_InputLayout as nullptr.
+   */
+    CDXInputLayout();
 
 private:
 

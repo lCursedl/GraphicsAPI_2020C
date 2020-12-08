@@ -10,11 +10,14 @@
 class COGLShaderProgram :
     public CShaderProgram
 {
-public:
+protected:
+
     /** \fn COGLShaderProgram()
     *   \brief Class constructor.
     */
-    COGLShaderProgram();
+    COGLShaderProgram() = default;
+
+public:    
 
     /** \fn ~COGLShaderProgram()
     *   \brief Class destructor.

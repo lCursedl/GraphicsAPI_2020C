@@ -8,13 +8,7 @@
 class CDXBuffer :
     public CBuffer
 {
-public:
-    /** \fn CDXBuffer()
-   *   \brief Class constructor
-   *
-   *   Sets m_Buffer as nullptr.
-   */
-    CDXBuffer();
+public:   
    
     /** \fn ~CDXBuffer()
     *   \brief Class destructor
@@ -22,9 +16,19 @@ public:
     *   If m_Buffer was used, release memory before deleting object
     */
     ~CDXBuffer();
+
+protected:
+
+    /** \fn CDXBuffer()
+   *   \brief Class constructor
+   *
+   *   Sets m_Buffer as nullptr.
+   */
+    CDXBuffer();
 private:
 
     ID3D11Buffer* m_Buffer;     /**< ID3D11Buffer pointer */
+    unsigned int m_Stride;      /**< Stride of buffer */
 
     friend class CDXGraphicsAPI;
 };

@@ -8,13 +8,16 @@
 class CDXTexture :
     public CTexture
 {
-public:
+protected:
+
 	/**	\fn CDXTexture()
 	*	\brief Class constructor.
-	* 
+	*
 	*	Sets m_pTexture, m_pRTV, m_pDSV and m_pSRV as nullptr;
 	*/
-    CDXTexture();
+	CDXTexture();
+
+public:	
 
 	/** \fn ~CDXTexture()
 	*	\brief Class destructor.
