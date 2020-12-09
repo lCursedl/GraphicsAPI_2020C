@@ -1,6 +1,5 @@
 #include "CDXGraphicsAPI.h"
 #include "CDXTexture.h"
-#include "CDXRTV.h"
 #include "CDXBuffer.h"
 #include "CDXShaderProgram.h"
 #include "CDXInputLayout.h"
@@ -162,6 +161,11 @@ void CDXGraphicsAPI::shutdown()
 	m_SwapChain->Release();
 	m_DeviceContext->Release();
 	m_Device->Release();
+}
+
+glm::mat4 CDXGraphicsAPI::matrix4Policy(const glm::mat4& mat)
+{
+	return glm::transpose(mat);
 }
 
 CTexture* CDXGraphicsAPI::createTexture(int width,
@@ -367,7 +371,6 @@ CShaderProgram* CDXGraphicsAPI::createShaderProgram()
 
 CBuffer* CDXGraphicsAPI::createBuffer(const void* data,
 	unsigned int size,
-	unsigned int stride,
 	BUFFER_TYPE type)
 {
 	if (size != 0)
@@ -381,7 +384,6 @@ CBuffer* CDXGraphicsAPI::createBuffer(const void* data,
 		buffDesc.BindFlags = (D3D11_BIND_FLAG)type;
 
 		CDXBuffer* DXBuffer = new CDXBuffer();
-		DXBuffer->m_Stride = stride;
 
 		if (data != nullptr)
 		{
@@ -750,19 +752,20 @@ void CDXGraphicsAPI::updateBuffer(CBuffer* buffer, const void* data)
 	m_DeviceContext->UpdateSubresource(buff->m_Buffer, 0, nullptr, data, 0, 0);
 }
 
-void CDXGraphicsAPI::setVertexBuffer(CBuffer* buffer)
+void CDXGraphicsAPI::setVertexBuffer(CBuffer* buffer,
+	unsigned int stride,
+	unsigned int offset)
 {
 	if (buffer != nullptr)
 	{
 		CDXBuffer* buff = dynamic_cast<CDXBuffer*>(buffer);
 		if (buff->m_Buffer != nullptr)
 		{
-			unsigned int offset = 0;
 			m_DeviceContext->IASetVertexBuffers(
 				0,
 				1,
 				&buff->m_Buffer,
-				&buff->m_Stride,
+				&stride,
 				&offset);
 		}
 		else

@@ -28,7 +28,6 @@ private:
 
     unsigned int m_Type;    /**< unsigned int for buffer type storing. */
     int m_Size;             /**< int for buffer size storing. */
-    int m_Stride;           /**< int for buffer stride storing.*/
     unsigned int m_Buffer;  /**< unsigned int for OpenGL buffer index */
 
     friend class COGLGraphicsAPI;

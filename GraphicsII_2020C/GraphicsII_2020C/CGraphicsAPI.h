@@ -1,6 +1,5 @@
 #pragma once                                                                             
 #include <windows.h>
-#include "CRTV.h"
 #include "CTexture.h"
 #include "CShader.h"
 #include "CBuffer.h"
@@ -27,6 +26,8 @@ struct COLOR
 	float alpha;
 };
 
+/**	\enum
+*/
 enum class TOPOLOGY
 {
 	POINTS,
@@ -58,6 +59,13 @@ public:
 	*/
 	virtual void shutdown() = 0;
 
+	/** \fn void matrix4Policy(const glm::mat4 & mat)
+	*	\brief Returns an API compatible matrix of 4 x 4 dimensions
+	*	@param[in] mat A glm::mat4 to make compatible.
+	*	\return The received matrix in the correct order.
+	*/
+	virtual glm::mat4 matrix4Policy(const glm::mat4 & mat) = 0;
+
 	/***********************************************************************************/
 	/*----------------------------------DEVICE-----------------------------------------*/
 	/***********************************************************************************/
@@ -76,6 +84,11 @@ public:
 		TEXTURE_BINDINGS binding,
 		FORMATS format) = 0;
 
+	/**	\fn createTextureFromFile(std::string path)
+	*	\brief Loads a texture file and returns a CTexture pointer with its data.
+	*	@param[in] path The path to the file.
+	*	\return CTexture pointer for the corresponding API with data.
+	*/
 	virtual CTexture* createTextureFromFile(std::string path) = 0;
 
 	/**	\fn CShaderProgram* createShaderProgram()
@@ -88,14 +101,12 @@ public:
 	*	\brief Creates a buffer with the received parameters and optionally data.
 	*	@param[in] data Pointer to the data to load. Can be nullptr.
 	*	@param[in] size Size of the data to load.
-	*	@param[in] stride Lenght of the data.
 	*	@param[in] type	Type of buffer to create (VERTEX_BUFFER,
 	*	INDEX_BUFFER, CONST_BUFFER).
 	*	\return CBuffer pointer of the corresponding API.
 	*/
 	virtual CBuffer* createBuffer(const void* data,
 		unsigned int size,
-		unsigned int stride,
 		BUFFER_TYPE type) = 0;
 
 	/**	\fn CInputLayout* createInputLayout(CShaderProgram* program, LAYOUT_DESC desc)
@@ -207,9 +218,13 @@ public:
 	/** void setVertexBuffer(CBuffer* buffer)
 	*	\brief Sets the specified buffer as the current vertex buffer.
 	*	@param[in] buffer Buffer to set.
+	*	@param[in] stride Lenght of the buffer data.
+	*	@param[in] offset Buffer offset from where to take data.
 	*	\warning If buffer is nullptr, no operations are done.
 	*/
-	virtual void setVertexBuffer(CBuffer* buffer) = 0;
+	virtual void setVertexBuffer(CBuffer* buffer,
+		unsigned int stride,
+		unsigned int offset) = 0;
 
 	/** \fn void setIndexBuffer(CBuffer* buffer)
 	*	\brief Sets the specified buffer as the current index buffer.

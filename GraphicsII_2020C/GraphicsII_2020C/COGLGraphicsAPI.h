@@ -15,8 +15,9 @@ private:
     GLenum m_Topology;
 
 public:
-    bool init(HWND window);
+    bool init(HWND window)                                    override;
     void shutdown()                                           override;
+    glm::mat4 matrix4Policy(const glm::mat4& mat)             override;
 
     //DEVICE
 
@@ -28,7 +29,6 @@ public:
     CShaderProgram* createShaderProgram()                     override;
     CBuffer* createBuffer(const void* data,
         unsigned int size,
-        unsigned int stride,
         BUFFER_TYPE type)                                     override;
     CInputLayout* createInputLayout(CShaderProgram* program,
         LAYOUT_DESC desc)                                     override;
@@ -54,7 +54,9 @@ public:
     void setInputLayout(CInputLayout* layout)                 override;
     void setRenderTarget(CTexture* texture, CTexture* depth)  override;
     void updateBuffer(CBuffer* buffer, const void* data)      override;
-    void setVertexBuffer(CBuffer* buffer)  override;
+    void setVertexBuffer(CBuffer* buffer,
+        unsigned int stride,
+        unsigned int offset)                                  override;
     void setIndexBuffer(CBuffer* buffer)                      override;
     void setSamplerState(unsigned int slot,
         CTexture* texture,

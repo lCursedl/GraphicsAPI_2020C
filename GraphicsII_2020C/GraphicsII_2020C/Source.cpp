@@ -75,7 +75,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 
 	ShowWindow(hwnd, nCmdShow);
 
-	CGraphicsAPI* graphicsAPI = new CDXGraphicsAPI();
+	CGraphicsAPI* graphicsAPI = new COGLGraphicsAPI();
 	graphicsAPI->init(hwnd);
 	Load(graphicsAPI, hwnd);
 
@@ -122,13 +122,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		POINT MousePoint;
 		GetCursorPos(&MousePoint);
 		Cam.mInitPos = { MousePoint.x, MousePoint.y, 0.f };
-		Cam.mIsClicked = true;
+		Cam.m_bIsClicked = true;
 		break;
 	case WM_RBUTTONUP:
-		Cam.mIsClicked = false;
+		Cam.m_bIsClicked = false;
 		break;
 	case WM_MOUSEMOVE:		
-		if (Cam.mIsClicked)
+		if (Cam.m_bIsClicked)
 		{
 			POINT EndPoint;
 			GetCursorPos(&EndPoint);
@@ -202,8 +202,8 @@ void Load(CGraphicsAPI* api, HWND hWnd)
 	//Create input layout
 	layout = api->createInputLayout(sp, lDesc);
 	//Create constant buffer
-	cbMatrices = api->createBuffer(nullptr, sizeof(Matrices), sizeof(Matrices),CONST_BUFFER);
-	cbView = api->createBuffer(nullptr, sizeof(ViewCB), sizeof(ViewCB),CONST_BUFFER);
+	cbMatrices = api->createBuffer(nullptr, sizeof(Matrices), CONST_BUFFER);
+	cbView = api->createBuffer(nullptr, sizeof(ViewCB), CONST_BUFFER);
 	//Initialize VM and PM of camera
 	CameraDesc desc;
 	desc.Pos = { 0.f, 2.f, -6.f };
@@ -215,7 +215,6 @@ void Load(CGraphicsAPI* api, HWND hWnd)
 	desc.NearPlane = 0.01f;
 	desc.FarPlane = 100.f;
 
-	Cam.setAPIMatrix(api);
 	Cam.init(desc);
 	
 	//Create structure to update CB
@@ -223,7 +222,7 @@ void Load(CGraphicsAPI* api, HWND hWnd)
 	//Assign world matrix as identity
 	mat.World = glm::mat4(1.0f);
 	//Generate Projection matrix
-	mat.Projection = Cam.getProjection();
+	mat.Projection = api->matrix4Policy(Cam.getProjection());
 	mat.Color = { 1.0f, 0.0f, 0.0f, 1.0f };
 	api->updateBuffer(cbMatrices, &mat);
 
@@ -259,6 +258,6 @@ void Update(CGraphicsAPI* api)
 	Cam.move();
 	Cam.rotate();
 	ViewCB vm;
-	vm.View = Cam.getView();
+	vm.View = api->matrix4Policy(Cam.getView());
 	api->updateBuffer(cbView, &vm);
 }

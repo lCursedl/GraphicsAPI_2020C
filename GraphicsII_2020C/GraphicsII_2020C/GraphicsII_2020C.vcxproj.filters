@@ -36,13 +36,7 @@
     <ClInclude Include="COGLGraphicsAPI.h">
       <Filter>Header Files\OpenGL</Filter>
     </ClInclude>
-    <ClInclude Include="COGLRTV.h">
-      <Filter>Header Files\OpenGL</Filter>
-    </ClInclude>
     <ClInclude Include="CDXGraphicsAPI.h">
-      <Filter>Header Files\DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="CDXRTV.h">
       <Filter>Header Files\DirectX</Filter>
     </ClInclude>
     <ClInclude Include="CDXTexture.h">
@@ -56,9 +50,6 @@
     </ClInclude>
     <ClInclude Include="COGLVertexShader.h">
       <Filter>Header Files\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="CRTV.h">
-      <Filter>Header Files\Base</Filter>
     </ClInclude>
     <ClInclude Include="CShader.h">
       <Filter>Header Files\Base</Filter>
@@ -134,13 +125,7 @@
     <ClCompile Include="COGLGraphicsAPI.cpp">
       <Filter>Source Files\OpenGL</Filter>
     </ClCompile>
-    <ClCompile Include="COGLRTV.cpp">
-      <Filter>Source Files\OpenGL</Filter>
-    </ClCompile>
     <ClCompile Include="CDXGraphicsAPI.cpp">
-      <Filter>Source Files\DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="CDXRTV.cpp">
       <Filter>Source Files\DirectX</Filter>
     </ClCompile>
     <ClCompile Include="CDXVertexShader.cpp">
@@ -151,9 +136,6 @@
     </ClCompile>
     <ClCompile Include="COGLTexture.cpp">
       <Filter>Source Files\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="CRTV.cpp">
-      <Filter>Source Files\Base</Filter>
     </ClCompile>
     <ClCompile Include="CShader.cpp">
       <Filter>Source Files\Base</Filter>

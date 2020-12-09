@@ -213,6 +213,7 @@ public:
 	*
 	*	Can rotate 360°.
 	*/
+
 	virtual void rotateRight(glm::vec3 Dir);
 	/** \fn virtual void rotateRight(glm::vec3 Dir)
 	*	\brief Rotates the Camera from its Right vector depending on a direction
@@ -220,6 +221,7 @@ public:
 	*
 	*	Can rotate 360°.
 	*/
+
 	virtual void rotateFront(glm::vec3 Dir);
 	/** \fn virtual void rotateFront(glm::vec3 Dir)
 	*	\brief Rotates the Camera from its Front vector depending on a direction
@@ -227,10 +229,12 @@ public:
 	*
 	*	Can rotate 360°.
 	*/
+
 	void createVM();
 	/** \fn void createVM()
 	*	\brief Creates a View Matrix from the required vectors
 	*/
+
 	void getKeyPress(unsigned int key);
 	/** \fn void getKeyPress(unsigned int key)
 	*	\brief Process the pressed key value received and determine corresponding action
@@ -238,6 +242,7 @@ public:
 	*
 	*	Detects W, A, S, D, Q, E, Left Arrow & Right Arrow keys.
 	*/
+
 	void getKeyRelease(unsigned int key);
 	/** \fn void getKeyRelease(unsigned int key)
 	*	\brief Process the released key value received and determine corresponding action
@@ -246,7 +251,6 @@ public:
 	*	Detects W, A, S, D, Q, E, Left Arrow & Right Arrow keys.
 	*/
 
-	void setAPIMatrix(CGraphicsAPI* api);
 
 	glm::mat4 getProjection();
 
@@ -254,7 +258,7 @@ public:
 
 	glm::vec3 mInitPos;	/**< Vec3 for mouse initial position */
 	glm::vec3 mEndPos;	/**< Vec3 for mouse final position */
-	bool mIsClicked;	/**< bool to determine if mouse's right click is pressed */
+	bool m_bIsClicked;	/**< bool to determine if mouse's right click is pressed */
 	glm::vec3 mDir;		/**< Vec3 for mouse direction */
 
 private:
@@ -266,22 +270,21 @@ private:
 	glm::vec3 Front;	/**< Vec3 for Front */
 	glm::vec3 Right;	/**< Vec3 for Right */
 	
-	float NearPlane;	/**< float variable */
-	float FarPlane;		/**< float variable */
-	float FOV;			/**< float Field Of View value */
-	float Width;		/**< float variable */
-	float Height;		/**< float variable */
+	float m_fNearPlane;	/**< float variable */
+	float m_fFarPlane;		/**< float variable */
+	float m_fFOV;			/**< float Field Of View value */
+	float m_fWidth;		/**< float variable */
+	float m_fHeight;		/**< float variable */
 
-	glm::mat4 View;		/**< Mat4 for View */
-	glm::mat4 Proj;		/**< Mat4 for Projection */	
+	glm::mat4 m_View;		/**< Mat4 for View */
+	glm::mat4 m_Proj;		/**< Mat4 for Projection */	
 	
-	bool mForward;		/**< bool to determine if camera is moving forward */
-	bool mBack;			/**< bool to determine if camera is moving backwards */
-	bool mLeft;			/**< bool to determine if camera is moving left */
-	bool mRight;		/**< bool to determine if camera is moving right */
-	bool mUp;			/**< bool to determine if camera is moving up */
-	bool mDown;			/**< bool to determine if camera is moving down */
-	bool mRotateLeft;	/**< bool to determine if camera is rotating counter clock wise*/
-	bool mRotateRight;	/**< bool to determine if camera is rotating clock wise */
-	bool mRowMajor;
+	bool m_bForward;		/**< bool to determine if camera is moving forward */
+	bool m_bBack;			/**< bool to determine if camera is moving backwards */
+	bool m_bLeft;			/**< bool to determine if camera is moving left */
+	bool m_bRight;		/**< bool to determine if camera is moving right */
+	bool m_bUp;			/**< bool to determine if camera is moving up */
+	bool m_bDown;			/**< bool to determine if camera is moving down */
+	bool m_bRotateLeft;	/**< bool to determine if camera is rotating counter clock wise*/
+	bool m_bRotateRight;	/**< bool to determine if camera is rotating clock wise */
 };

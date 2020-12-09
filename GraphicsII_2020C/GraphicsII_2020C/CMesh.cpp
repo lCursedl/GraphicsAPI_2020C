@@ -49,11 +49,9 @@ void CMesh::setupMesh(CGraphicsAPI* api)
 {
 	m_pVertexBuffer = api->createBuffer(m_vVertices->data(),
 										sizeof(MeshVertex) * m_vVertices->size(),
-										sizeof(MeshVertex),
 										VERTEX_BUFFER);
 	m_pIndexBuffer = api->createBuffer(m_vIndices->data(),
 										sizeof(unsigned int) * m_vIndices->size(),
-										sizeof(unsigned int),
 										INDEX_BUFFER);
 }
 
@@ -64,7 +62,7 @@ void CMesh::draw(CGraphicsAPI* api, CSamplerState* sstate)
 		api->setSamplerState(0, m_vTextures[i].m_Texture, sstate);
 		api->setTexture(i, m_vTextures[i].m_Texture);
 	}
-	api->setVertexBuffer(m_pVertexBuffer);
+	api->setVertexBuffer(m_pVertexBuffer, sizeof(MeshVertex), 0);
 	api->setIndexBuffer(m_pIndexBuffer);
 	api->drawIndexed(m_vIndices->size());
 }

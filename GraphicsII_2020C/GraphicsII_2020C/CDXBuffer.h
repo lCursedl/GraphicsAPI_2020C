@@ -28,7 +28,6 @@ protected:
 private:
 
     ID3D11Buffer* m_Buffer;     /**< ID3D11Buffer pointer */
-    unsigned int m_Stride;      /**< Stride of buffer */
 
     friend class CDXGraphicsAPI;
 };

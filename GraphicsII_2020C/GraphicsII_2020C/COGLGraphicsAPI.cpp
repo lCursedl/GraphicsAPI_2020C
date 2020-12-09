@@ -1,5 +1,4 @@
 #include "COGLGraphicsAPI.h"
-#include "COGLRTV.h"
 #include "COGLTexture.h"
 #include "COGLBuffer.h"
 #include "COGLShaderProgram.h"
@@ -169,6 +168,11 @@ bool COGLGraphicsAPI::init(HWND window)
 void COGLGraphicsAPI::shutdown()
 {
 	wglDeleteContext(oglRenderContext);
+}
+
+glm::mat4 COGLGraphicsAPI::matrix4Policy(const glm::mat4& mat)
+{
+	return glm::mat4(mat);
 }
 
 CTexture* COGLGraphicsAPI::createTexture(int width,
@@ -413,14 +417,16 @@ void COGLGraphicsAPI::updateBuffer(CBuffer* buffer, const void* data)
 	glBindBuffer(buff->m_Type, 0);
 }
 
-void COGLGraphicsAPI::setVertexBuffer(CBuffer* buffer)
+void COGLGraphicsAPI::setVertexBuffer(CBuffer* buffer,
+	unsigned int stride,
+	unsigned int offset)
 {
 	if (buffer != nullptr)
 	{
 		COGLBuffer* buff = dynamic_cast<COGLBuffer*>(buffer);
 		if (buff->m_Buffer != 0)
 		{
-			glBindVertexBuffer(0, buff->m_Buffer, 0, buff->m_Stride);
+			glBindVertexBuffer(0, buff->m_Buffer, offset, stride);
 		}
 		else
 		{
@@ -602,7 +608,6 @@ void COGLGraphicsAPI::swapBuffer()
 
 CBuffer* COGLGraphicsAPI::createBuffer(const void* data,
 	unsigned int size,
-	unsigned int stride,
 	BUFFER_TYPE type)
 {
 	if (size != 0)
@@ -611,7 +616,6 @@ CBuffer* COGLGraphicsAPI::createBuffer(const void* data,
 
 		glGenBuffers(1, &OGLBuffer->m_Buffer);
 		OGLBuffer->m_Size = size;
-		OGLBuffer->m_Stride = stride;
 
 		switch (type)
 		{

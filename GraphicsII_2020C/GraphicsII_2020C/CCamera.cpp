@@ -3,15 +3,15 @@
 
 CCamera::CCamera()
 {
-	mIsClicked = false;
-	mForward = false;
-	mBack = false;
-	mLeft = false;
-	mRight = false;
-	mUp = false;
-	mDown = false;
-	mRotateLeft = false;
-	mRotateRight = false;
+	m_bIsClicked = false;
+	m_bForward = false;
+	m_bBack = false;
+	m_bLeft = false;
+	m_bRight = false;
+	m_bUp = false;
+	m_bDown = false;
+	m_bRotateLeft = false;
+	m_bRotateRight = false;
 }
 
 CCamera::~CCamera() {}
@@ -69,27 +69,27 @@ void CCamera::setUp(glm::vec3 rFront, glm::vec3 rRight)
 
 void CCamera::setFOV(float rFOV)
 {
-	FOV = rFOV;
+	m_fFOV = rFOV;
 }
 
 void CCamera::setWidth(float rWidth)
 {
-	Width = rWidth;
+	m_fWidth = rWidth;
 }
 
 void CCamera::setHeigth(float rHeigth)
 {
-	Height = rHeigth;
+	m_fHeight = rHeigth;
 }
 
 void CCamera::setNear(float rNear)
 {
-	NearPlane = rNear;
+	m_fNearPlane = rNear;
 }
 
 void CCamera::setFar(float rFar)
 {
-	FarPlane = rFar;
+	m_fFarPlane = rFar;
 }
 
 glm::vec3 CCamera::getPos()
@@ -109,27 +109,27 @@ glm::vec3 CCamera::getUp()
 
 float CCamera::getFOV()
 {
-	return FOV;
+	return m_fFOV;
 }
 
 float CCamera::getWidth()
 {
-	return Width;
+	return m_fWidth;
 }
 
 float CCamera::getHeigth()
 {
-	return Height;
+	return m_fHeight;
 }
 
 float CCamera::getNear()
 {
-	return NearPlane;
+	return m_fNearPlane;
 }
 
 float CCamera::getFar()
 {
-	return FarPlane;
+	return m_fFarPlane;
 }
 
 glm::vec3 CCamera::getFront()
@@ -144,42 +144,46 @@ glm::vec3 CCamera::getRight()
 
 void CCamera::updateVM()
 {
-	Right = { View[0][0], View[1][0], View[2][0] };
-	Up =	{ View[0][1], View[1][1], View[2][1] };
-	Front = { View[0][2], View[1][2], View[2][2] };
+	Right = { m_View[0][0], m_View[1][0], m_View[2][0] };
+	Up =	{ m_View[0][1], m_View[1][1], m_View[2][1] };
+	Front = { m_View[0][2], m_View[1][2], m_View[2][2] };
 	LAt = Front + Pos;
 }
 
 void CCamera::updatePM()
 {
-	Proj = glm::perspectiveFovLH(FOV, Width, Height, NearPlane, FarPlane);
+	m_Proj = glm::perspectiveFovLH(m_fFOV,
+		m_fWidth,
+		m_fHeight,
+		m_fNearPlane,
+		m_fFarPlane);
 }
 
 void CCamera::move()
 {
-	if (mForward)
+	if (m_bForward)
 	{
 		Pos += (Front * STEP);
 	}
-	if (mBack)
+	if (m_bBack)
 	{
 		Pos += (Front * -STEP);
 	}
 
-	if (mLeft)
+	if (m_bLeft)
 	{
 		Pos += (Right * -STEP);
 	}
-	if (mRight)
+	if (m_bRight)
 	{
 		Pos += (Right * STEP);
 	}
 
-	if (mUp)
+	if (m_bUp)
 	{
 		Pos += (Up * STEP);
 	}
-	if (mDown)
+	if (m_bDown)
 	{
 		Pos += (Up * -STEP);
 	}
@@ -198,35 +202,18 @@ void CCamera::move()
 		-Pos.x, -Pos.y, -Pos.z, 1
 	};
 
-	/*glm::mat4 Axis = glm::mat4(1.f);
-	Axis[0][0] = Right.x;
-	Axis[1][0] = Right.y;
-	Axis[2][0] = Right.z;
-	Axis[0][1] = Up.x;
-	Axis[1][1] = Up.y;
-	Axis[2][1] = Up.z;
-	Axis[0][2] = Front.x;
-	Axis[1][2] = Front.y;
-	Axis[2][2] = Front.z;
-
-	glm::mat4 Position = glm::mat4(1.f);
-
-	Position[3][0] = -Pos.x;
-	Position[3][1] = -Pos.y;
-	Position[3][2] = -Pos.z;*/
-
-	View = Axis * Position;
+	m_View = Axis * Position;
 
 	updateVM();
 }
 
 void CCamera::rotate()
 {
-	if (mRotateLeft)
+	if (m_bRotateLeft)
 	{
 		rotateFront({ 0.f, 0.f, ROTATESTEP });
 	}
-	if (mRotateRight)
+	if (m_bRotateRight)
 	{
 		rotateFront({ 0.f, 0.f, -ROTATESTEP });
 	}
@@ -250,7 +237,7 @@ void CCamera::rotateUp(glm::vec3 Dir)
 		camsin, 0.f, camcos,	0.f,
 		0.f,	 0.f, 0.f,		1.f
 	};
-	View *= RotX;
+	m_View *= RotX;
 	updateVM();
 }
 
@@ -266,7 +253,7 @@ void CCamera::rotateRight(glm::vec3 Dir)
 		0.f, -camsin, camcos,  0.f,
 		0.f, 0.f,	 0.f,	  1.f
 	};
-	View *= RotY;
+	m_View *= RotY;
 	updateVM();
 }
 
@@ -282,7 +269,7 @@ void CCamera::rotateFront(glm::vec3 Dir)
 		0.f, 0.f,1.f, 0.f,
 		0.f, 0.f,	0.f,	1.f
 	};
-	View *= RotZ;
+	m_View *= RotZ;
 	updateVM();
 }
 
@@ -291,37 +278,37 @@ void CCamera::getKeyPress(unsigned int key)
 	//Z Movement
 	if (key == 'W')
 	{
-		mForward = true;
+		m_bForward = true;
 	}
 	else if (key == 'S')
 	{
-		mBack = true;
+		m_bBack = true;
 	}
 	//X Movement
 	if (key == 'A')
 	{
-		mLeft = true;
+		m_bLeft = true;
 	}
 	else if (key == 'D')
 	{
-		mRight = true;
+		m_bRight = true;
 	}
 	//Y Movement
 	if (key == 'Q')
 	{
-		mUp = true;
+		m_bUp = true;
 	}
 	else if (key == 'E')
 	{
-		mDown = true;
+		m_bDown = true;
 	}
 	if (key == 37)
 	{
-		mRotateLeft = true;
+		m_bRotateLeft = true;
 	}
 	else if (key == 39)
 	{
-		mRotateRight = true;
+		m_bRotateRight = true;
 	}
 }
 
@@ -329,67 +316,46 @@ void CCamera::getKeyRelease(unsigned int key)
 {
 	if (key == 'W')
 	{
-		mForward = false;
+		m_bForward = false;
 	}
 	else if (key == 'S')
 	{
-		mBack = false;
+		m_bBack = false;
 	}
 	if (key == 'A')
 	{
-		mLeft = false;
+		m_bLeft = false;
 	}
 	else if (key == 'D')
 	{
-		mRight = false;
+		m_bRight = false;
 	}
 	if (key == 'Q')
 	{
-		mUp = false;
+		m_bUp = false;
 	}
 	else if (key == 'E')
 	{
-		mDown = false;
+		m_bDown = false;
 	}
 	if (key == 37)
 	{
-		mRotateLeft = false;
+		m_bRotateLeft = false;
 	}
 	else if (key == 39)
 	{
-		mRotateRight = false;
-	}
-}
-
-void CCamera::setAPIMatrix(CGraphicsAPI* api)
-{
-	if (api)
-	{
-		CDXGraphicsAPI* pApi = dynamic_cast<CDXGraphicsAPI*>(api);
-		mRowMajor = pApi == nullptr ? false : true;
-	}
-	else
-	{
-		OutputDebugStringA("Invalid GraphicsAPI received");
+		m_bRotateRight = false;
 	}
 }
 
 glm::mat4 CCamera::getProjection()
 {
-	if (mRowMajor)
-	{
-		return glm::transpose(Proj);
-	}
-	return Proj;
+	return m_Proj;
 }
 
 glm::mat4 CCamera::getView()
 {
-	if (mRowMajor)
-	{
-		return glm::transpose(View);
-	}
-	return View;
+	return m_View;
 }
 
 void CCamera::createVM()
@@ -412,5 +378,5 @@ void CCamera::createVM()
 		-Pos.x, -Pos.y, -Pos.z, 1
 	};
 
-	View = Axis * Position;
+	m_View = Axis * Position;
 }
