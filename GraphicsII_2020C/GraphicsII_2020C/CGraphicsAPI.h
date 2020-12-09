@@ -84,7 +84,7 @@ public:
 		TEXTURE_BINDINGS binding,
 		FORMATS format) = 0;
 
-	/**	\fn createTextureFromFile(std::string path)
+	/**	\fn CTexture* createTextureFromFile(std::string path)
 	*	\brief Loads a texture file and returns a CTexture pointer with its data.
 	*	@param[in] path The path to the file.
 	*	\return CTexture pointer for the corresponding API with data.
