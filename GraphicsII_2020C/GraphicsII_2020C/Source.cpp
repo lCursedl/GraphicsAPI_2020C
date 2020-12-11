@@ -3,22 +3,20 @@
 #include "CCamera.h"
 #include "CModel.h"
 
-struct Vertex
-{
-	glm::vec3 Position;
-	glm::vec2 Texcoord;
-};
-
 struct Matrices
 {
 	glm::mat4 World;
-	glm::mat4 Projection;
 	glm::vec4 Color;
 };
 
 struct ViewCB
 {
 	glm::mat4 View;
+};
+
+struct ProjectionCB
+{
+	glm::mat4 Projection;
 };
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -29,6 +27,7 @@ void Update(CGraphicsAPI* api);
 
 CBuffer* cbMatrices = nullptr;
 CBuffer* cbView = nullptr;
+CBuffer* cbProj = nullptr;
 CShaderProgram* sp = nullptr;
 CShaderProgram* sp2 = nullptr;
 CInputLayout* layout = nullptr;
@@ -40,6 +39,10 @@ CPixelShader* posPS = nullptr;
 CSamplerState* sampler = nullptr;
 CModel* myModel = nullptr;
 CCamera Cam;
+CGraphicsAPI* graphicsAPI = nullptr;
+
+unsigned int widthWindow = 800;
+unsigned int heightWindow = 600;
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow)
 {
@@ -61,8 +64,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
-		800,
-		600,
+		widthWindow,
+		heightWindow,
 		nullptr,
 		nullptr,
 		hInstance,
@@ -70,12 +73,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 
 	if (hwnd == NULL)
 	{
-		return 0;
+		return -1;
 	}
 
 	ShowWindow(hwnd, nCmdShow);
 
-	CGraphicsAPI* graphicsAPI = new COGLGraphicsAPI();
+	graphicsAPI = new COGLGraphicsAPI();
 	graphicsAPI->init(hwnd);
 	Load(graphicsAPI, hwnd);
 
@@ -95,6 +98,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 	}
 	Clear();
 	graphicsAPI->shutdown();
+	delete graphicsAPI;
 	return 0;
 }
 
@@ -121,21 +125,51 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_RBUTTONDOWN:
 		POINT MousePoint;
 		GetCursorPos(&MousePoint);
-		Cam.mInitPos = { MousePoint.x, MousePoint.y, 0.f };
-		Cam.m_bIsClicked = true;
+		Cam.setInitPos({ MousePoint.x, MousePoint.y, 0.f });
+		Cam.setClicked(true);
 		break;
 	case WM_RBUTTONUP:
-		Cam.m_bIsClicked = false;
+		Cam.setClicked(false);
 		break;
 	case WM_MOUSEMOVE:		
-		if (Cam.m_bIsClicked)
+		if (Cam.getClicked())
 		{
 			POINT EndPoint;
 			GetCursorPos(&EndPoint);
-			Cam.mEndPos = { EndPoint.x, EndPoint.y, 0.f };
-			SetCursorPos(Cam.mInitPos.x, Cam.mInitPos.y);
-			Cam.mDir = Cam.mInitPos - Cam.mEndPos;
-			Cam.rotate(Cam.mDir);
+			Cam.setEndPos({ EndPoint.x, EndPoint.y, 0.f });
+			SetCursorPos(Cam.getInitPos().x, Cam.getInitPos().y);
+			Cam.rotatePitchYaw();
+		}
+		break;
+	case WM_SIZE:
+		if (graphicsAPI)
+		{
+			RECT rc;
+			GetClientRect(hWnd, &rc);
+
+			graphicsAPI->resizeBackBuffer(rc.right, rc.bottom);
+
+			delete rtv;
+			delete depthTex;
+
+			rtv = graphicsAPI->createTexture(rc.right,
+				rc.bottom,
+				TEXTURE_BINDINGS::RENDER_TARGET | TEXTURE_BINDINGS::SHADER_RESOURCE,
+				RGBA16_FLOAT);
+			depthTex = graphicsAPI->createTexture(rc.right,
+				rc.bottom,
+				TEXTURE_BINDINGS::DEPTH_STENCIL,
+				D24_S8);
+
+			Cam.setWidth(rc.right);
+			Cam.setHeigth(rc.bottom);
+			Cam.updatePM();
+
+			ProjectionCB P;
+			P.Projection = graphicsAPI->matrix4Policy(Cam.getProjection());
+			graphicsAPI->updateBuffer(cbProj, &P);
+
+			graphicsAPI->setViewport(0, 0, rc.right, rc.bottom);
 		}
 		break;
 	default:
@@ -148,6 +182,7 @@ void Clear()
 {
 	delete cbMatrices;
 	delete cbView;
+	delete cbProj;
 	delete layout;
 	delete rtv;
 	delete depthTex;
@@ -166,10 +201,13 @@ void Load(CGraphicsAPI* api, HWND hWnd)
 	GetClientRect(hWnd, &rc);
 	api->setViewport(0, 0, rc.right, rc.bottom);
 	//Create rt for offscreen rendering
-	rtv = api->createTexture(800, 600,
+	rtv = api->createTexture(rc.right, rc.bottom,
 		TEXTURE_BINDINGS::RENDER_TARGET | TEXTURE_BINDINGS::SHADER_RESOURCE,
 		RGBA16_FLOAT);
-	depthTex = api->createTexture(800, 600, TEXTURE_BINDINGS::DEPTH_STENCIL, D24_S8);
+	depthTex = api->createTexture(rc.right,
+		rc.bottom,
+		TEXTURE_BINDINGS::DEPTH_STENCIL,
+		D24_S8);
 	//Compile and create vertex / pixel shader
 	defaultVS = api->createVertexShader(L"VS");
 	redPS = api->createPixelShader(L"PS");
@@ -204,6 +242,7 @@ void Load(CGraphicsAPI* api, HWND hWnd)
 	//Create constant buffer
 	cbMatrices = api->createBuffer(nullptr, sizeof(Matrices), CONST_BUFFER);
 	cbView = api->createBuffer(nullptr, sizeof(ViewCB), CONST_BUFFER);
+	cbProj = api->createBuffer(nullptr, sizeof(ProjectionCB), CONST_BUFFER);
 	//Initialize VM and PM of camera
 	CameraDesc desc;
 	desc.Pos = { 0.f, 2.f, -6.f };
@@ -221,15 +260,18 @@ void Load(CGraphicsAPI* api, HWND hWnd)
 	Matrices mat;
 	//Assign world matrix as identity
 	mat.World = glm::mat4(1.0f);
-	//Generate Projection matrix
-	mat.Projection = api->matrix4Policy(Cam.getProjection());
 	mat.Color = { 1.0f, 0.0f, 0.0f, 1.0f };
 	api->updateBuffer(cbMatrices, &mat);
+
+	ProjectionCB project;
+	project.Projection = api->matrix4Policy(Cam.getProjection());
+	api->updateBuffer(cbProj, &project);
 
 	api->setInputLayout(layout);
 
 	api->setConstantBuffer(0, cbMatrices, VERTEX_SHADER);
 	api->setConstantBuffer(1, cbView, VERTEX_SHADER);
+	api->setConstantBuffer(2, cbProj, VERTEX_SHADER);
 	api->setConstantBuffer(0, cbMatrices, PIXEL_SHADER);
 
 	//initialize model and load it

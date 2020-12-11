@@ -286,4 +286,11 @@ public:
 	*	\brief Swaps the back buffer with the front buffer and presents it.
 	*/
 	virtual void swapBuffer() = 0;
+
+	/** \fn void resizeBackBuffer(unsigned int width, unsigned int height)
+	*	\brief Resizes both backbuffer and its depth stencil.
+	*	@param[in] width New X dimension for back buffer.
+	*	@param[in] height New Y dimension for back buffer.
+	*/
+	virtual void resizeBackBuffer(unsigned int width, unsigned int height) = 0;
 };

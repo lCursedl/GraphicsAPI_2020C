@@ -606,6 +606,8 @@ void COGLGraphicsAPI::swapBuffer()
 	SwapBuffers(m_Handle);
 }
 
+void COGLGraphicsAPI::resizeBackBuffer(unsigned int width, unsigned int height){}
+
 CBuffer* COGLGraphicsAPI::createBuffer(const void* data,
 	unsigned int size,
 	BUFFER_TYPE type)

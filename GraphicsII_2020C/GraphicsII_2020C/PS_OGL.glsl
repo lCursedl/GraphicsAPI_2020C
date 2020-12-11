@@ -4,13 +4,17 @@ out vec4 FragColor;
 layout(std140, binding = 0) uniform Matrices
 {
 	mat4 World;
-	mat4 Projection;
 	vec4 Color;
 };
 
 layout(std140, binding = 1) uniform cbView
 {
 	mat4 View;
+};
+
+layout(std140, binding = 2) uniform cbProjection
+{
+	mat4 Projection;
 };
 
 in vec2 Texcoord;

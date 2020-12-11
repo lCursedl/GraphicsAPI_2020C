@@ -69,6 +69,8 @@ public:
     //SWAPCHAIN
 
     void swapBuffer()                                         override;
+    void resizeBackBuffer(unsigned int width,
+        unsigned int height)                                  override;
 
 private:
     ID3D11Device*           m_Device;

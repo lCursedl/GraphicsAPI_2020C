@@ -116,6 +116,24 @@ public:
 	*	@param[in] rFar float with value
 	*/
 
+	/**	\fn void setInitPos(glm::vec3 rPosition)
+	*	\brief Stores the cursor initial position onscreen.
+	*	@param[in] rPosition glm::vec3 with value.
+	*/
+	void setInitPos(glm::vec3 rPosition);
+
+	/** \fn void setEndPos(glm::vec3 rPosition)
+	*	\brief Stores the cursor final position onscreen.
+	*	@param[in] rPosition glm::vec3 with value.
+	*/
+	void setEndPos(glm::vec3 rPosition);
+
+	/** \fn void setClicked(float rClick)
+	*	\brief Stores the cursor clicked state.
+	*	@param[in] rClick bool with value.
+	*/
+	void setClicked(float rClick);
+
 	//Getters
 
 	glm::vec3 getPos();
@@ -178,6 +196,26 @@ public:
 	*	\return a float with Camera's Far Plane value for PM
 	*/
 
+	/** \fn glm::vec3 getInitPos()
+	*	\brief Obtains the camera's mouse initial position vector
+	*	\return A glm::vec3 with position info.
+	*/
+	glm::vec3 getInitPos();
+
+	/**	\fn glm::vec3 getEndPos()
+	*	\breif Obtains the camera's mouse end position vector.
+	*	\return A glm::vec3 with position info.
+	*/
+	glm::vec3 getEndPos();
+
+	/**	\fn bool getClicked()
+	*	\brief Obtains the camera's mouse clicked state.
+	*	\return A bool with indicates if mouse was clicked or not.
+	*/
+	bool getClicked();
+
+	//Methods
+
 	virtual void updateVM();
 	/** \fn virtual void updateVM()
 	*	\brief Updates Free Camera View Matrix
@@ -200,10 +238,10 @@ public:
 	*	\brief Rotates the Camera in the Z axis (Roll) depending on the input
 	*/
 
-	void rotate(glm::vec3 mouseDir);
-	/** \fn void rotate(glm::vec3 mouseDir)
-	*	\brief Rotates the Camera in the X and Y axis (Pitch & Yaw) depending on the direction
-	*	@param[in] mouseDir Vec3 with Direction value
+	void rotatePitchYaw();
+	/** \fn void rotatePitchYaw()
+	*	\brief Rotates the Camera in the X and Y axis (Pitch & Yaw) depending 
+	*	on the direction result from substracting mEndPos from mInitPos.
 	*/
 
 	void rotateUp(glm::vec3 Dir);
@@ -254,12 +292,7 @@ public:
 
 	glm::mat4 getProjection();
 
-	glm::mat4 getView();
-
-	glm::vec3 mInitPos;	/**< Vec3 for mouse initial position */
-	glm::vec3 mEndPos;	/**< Vec3 for mouse final position */
-	bool m_bIsClicked;	/**< bool to determine if mouse's right click is pressed */
-	glm::vec3 mDir;		/**< Vec3 for mouse direction */
+	glm::mat4 getView();	
 
 private:
 
@@ -277,7 +310,12 @@ private:
 	float m_fHeight;		/**< float variable */
 
 	glm::mat4 m_View;		/**< Mat4 for View */
-	glm::mat4 m_Proj;		/**< Mat4 for Projection */	
+	glm::mat4 m_Proj;		/**< Mat4 for Projection */
+	
+	glm::vec3 mInitPos;	/**< Vec3 for mouse initial position */
+	glm::vec3 mEndPos;	/**< Vec3 for mouse final position */
+	bool m_bIsClicked;	/**< bool to determine if mouse's right click is pressed */
+	glm::vec3 mDir;		/**< Vec3 for mouse direction */
 	
 	bool m_bForward;		/**< bool to determine if camera is moving forward */
 	bool m_bBack;			/**< bool to determine if camera is moving backwards */

@@ -92,6 +92,21 @@ void CCamera::setFar(float rFar)
 	m_fFarPlane = rFar;
 }
 
+void CCamera::setInitPos(glm::vec3 rPosition)
+{
+	mInitPos = rPosition;
+}
+
+void CCamera::setEndPos(glm::vec3 rPosition)
+{
+	mEndPos = rPosition;
+}
+
+void CCamera::setClicked(float rClick)
+{
+	m_bIsClicked = rClick;
+}
+
 glm::vec3 CCamera::getPos()
 {
 	return Pos;
@@ -140,6 +155,21 @@ glm::vec3 CCamera::getFront()
 glm::vec3 CCamera::getRight()
 {
 	return Right;
+}
+
+glm::vec3 CCamera::getInitPos()
+{
+	return mInitPos;
+}
+
+glm::vec3 CCamera::getEndPos()
+{
+	return mEndPos;
+}
+
+bool CCamera::getClicked()
+{
+	return m_bIsClicked;
 }
 
 void CCamera::updateVM()
@@ -219,10 +249,11 @@ void CCamera::rotate()
 	}
 }
 
-void CCamera::rotate(glm::vec3 mouseDir)
+void CCamera::rotatePitchYaw()
 {
-	rotateUp(mouseDir);
-	rotateRight(mouseDir);
+	mDir = mInitPos - mEndPos;
+	rotateUp(mDir);
+	rotateRight(mDir);
 }
 
 void CCamera::rotateUp(glm::vec3 Dir)
