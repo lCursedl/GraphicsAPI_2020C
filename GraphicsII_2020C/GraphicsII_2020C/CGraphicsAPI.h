@@ -59,7 +59,7 @@ public:
 	*/
 	virtual void shutdown() = 0;
 
-	/** \fn void matrix4Policy(const glm::mat4 & mat)
+	/** \fn glm::mat4 matrix4Policy(const glm::mat4 & mat)
 	*	\brief Returns an API compatible matrix of 4 x 4 dimensions
 	*	@param[in] mat A glm::mat4 to make compatible.
 	*	\return The received matrix in the correct order.
