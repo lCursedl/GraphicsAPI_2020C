@@ -26,7 +26,8 @@ struct COLOR
 	float alpha;
 };
 
-/**	\enum
+/**	\enum TOPOLOGY
+*	\brief Enum which defines the different types of topologies available from the api.
 */
 enum class TOPOLOGY
 {

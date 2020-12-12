@@ -16,14 +16,7 @@ struct CameraDesc
 {
 	// Minimum variables required to generate camera's VM
 	glm::vec3 Pos;		/**< Vec3 for Position */
-	glm::vec3 LAt;		/**< Vec3 for LookAt */
-	glm::vec3 Up;		/**< Vec3 for Up */
-	// Structure only receives reference to world's Up
-	glm::vec3 Front;	/**< Vec3 for Front */
-	glm::vec3 Right;	/**< Vec3 for Right */
 	// Variables to generate PM
-	float NearPlane;	/**< float variable */
-	float FarPlane;		/**< float variable */
 	float FOV;			/**< float Field Of View value */
 	float Width;		/**< float variable */
 	float Height;		/**< float variable */

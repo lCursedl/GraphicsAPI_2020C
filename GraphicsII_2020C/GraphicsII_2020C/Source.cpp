@@ -246,13 +246,9 @@ void Load(CGraphicsAPI* api, HWND hWnd)
 	//Initialize VM and PM of camera
 	CameraDesc desc;
 	desc.Pos = { 0.f, 2.f, -6.f };
-	desc.LAt = { 0.f, 2.f, -5.f };
-	desc.Up = { 0.f, 1.f, 0.f };
-	desc.FOV = glm::radians(40.f);
+	desc.FOV = 40;
 	desc.Width = rc.right;
 	desc.Height = rc.bottom;
-	desc.NearPlane = 0.01f;
-	desc.FarPlane = 100.f;
 
 	Cam.init(desc);
 	

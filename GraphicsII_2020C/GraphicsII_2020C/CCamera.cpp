@@ -20,13 +20,13 @@ int CCamera::init(CameraDesc Ref)
 {
 	//Set common values
 	setPos(Ref.Pos);
-	setLAt(Ref.LAt);
-	setUp(Ref.Up);
-	setFOV(Ref.FOV);
+	setLAt({0.f, 2.f, -5.f});
+	setUp({0.f, 1.f, 0.f});
+	setFOV(glm::radians(std::clamp<float>(Ref.FOV, 40.f, 90.f)));
 	setWidth(Ref.Width);
 	setHeigth(Ref.Height);
-	setNear(Ref.NearPlane);
-	setFar(Ref.FarPlane);
+	setNear(0.01f);
+	setFar(100.f);
 
 	//Set Front, Right & Up
 
